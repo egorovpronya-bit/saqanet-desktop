@@ -1,0 +1,149 @@
+name: SAQANet Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: false
+        default: 'all'
+        type: choice
+        options: [all, windows, macos]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.38.5'
+  IS_GITHUB_ACTIONS: '1'
+  CHANNEL: 'prod'
+  TAG_NAME: 'latest'
+  UPLOAD_ARTIFACT: 'true'
+  TARGET_NAME_exe: 'SAQANet-Windows-Setup-x64'
+  TARGET_NAME_zip: 'SAQANet-Windows-Portable-x64'
+  TARGET_NAME_dmg: 'SAQANet-MacOS'
+
+jobs:
+  build-windows:
+    if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'windows' || github.event_name == 'push' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: make windows-install-deps
+
+      - name: Prepare
+        run: make windows-prepare
+
+      - name: Build Windows
+        run: make windows-exe-release windows-zip-release
+
+      - name: Collect artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "out" -Force | Out-Null
+          Get-ChildItem -Path dist -Recurse -Filter "*.exe" | ForEach-Object {
+            Copy-Item $_.FullName "out\$env:TARGET_NAME_exe.exe" -Force
+          }
+          Get-ChildItem -Path dist -Recurse -Filter "*.zip" | ForEach-Object {
+            Copy-Item $_.FullName "out\$env:TARGET_NAME_zip.zip" -Force
+          }
+          Get-ChildItem out
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: out/
+          retention-days: 7
+
+  build-macos:
+    if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'macos' || github.event_name == 'push' }}
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: make macos-install-deps
+
+      - name: Prepare
+        run: make macos-prepare
+
+      - name: Build macOS
+        run: make macos-release
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p out
+          find dist -name "*.dmg" -exec cp {} out/${TARGET_NAME_dmg}.dmg \;
+          ls -la out/
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: out/
+          retention-days: 7
+
+  create-release:
+    needs: [build-windows, build-macos]
+    if: always() && (needs.build-windows.result == 'success' || needs.build-macos.result == 'success')
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: out/
+          merge-multiple: true
+
+      - name: List files
+        run: ls -la out/
+
+      - name: Create or update draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          name: 'SAQANet Latest Build'
+          tag_name: 'latest'
+          prerelease: true
+          body: |
+            ## SAQANet Desktop Client
+
+            Автоматическая сборка из ветки `main`.
+
+            ### Установка Windows
+            - `SAQANet-Windows-Setup-x64.exe` — установщик (рекомендуется)
+            - `SAQANet-Windows-Portable-x64.zip` — портативная версия
+
+            ### Установка macOS
+            - `SAQANet-MacOS.dmg` — образ диска
+            - При первом запуске: правая кнопка → Открыть (обход Gatekeeper)
+
+            ### Подключение
+            Запусти приложение → нажми **+** → вставь ключ из бота @SAQANet_bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

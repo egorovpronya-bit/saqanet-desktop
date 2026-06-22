@@ -254,7 +254,7 @@ jobs:
           make ${{ matrix.platform }}-release
 
       - name: Code Sign
-        if: ${{ inputs.upload-artifact && startsWith(matrix.platform,'windows') }}
+        if: ${{ inputs.upload-artifact && startsWith(matrix.platform,'windows') && secrets.WINDOWS_SIGNING_KEY != '' }}
         uses: hiddify/signtool-code-sign-sha256@main
         with:
           certificate: '${{ secrets.WINDOWS_SIGNING_KEY }}'
@@ -263,7 +263,7 @@ jobs:
           folder: 'dist'
           timestamp-server: 'http://timestamp.digicert.com'
           recursive: true
-          description: 'Hiddify'
+          description: 'SAQANet'
 
       - name: Copy to out Windows
         if: matrix.platform == 'windows'
