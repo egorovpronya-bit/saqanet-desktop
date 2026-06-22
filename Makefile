@@ -1,4 +1,4 @@
-﻿# .ONESHELL:
+# .ONESHELL:
 include dependencies.properties
 
 # --- Log Colors ---
