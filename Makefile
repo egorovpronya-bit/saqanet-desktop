@@ -45,15 +45,11 @@ IOS_OUT=ios$(SEP)Frameworks
 DESKTOP_OUT=SAQANet-core$(SEP)bin
 GEO_ASSETS_DIR=assets$(SEP)core
 
-CORE_PRODUCT_NAME=SAQANet-core
-CORE_NAME=SAQANet-lib
-LIB_NAME=SAQANet-core
+CORE_PRODUCT_NAME=hiddify-core
+CORE_NAME=hiddify-lib
+LIB_NAME=hiddify-core
 
-ifeq ($(CHANNEL),prod)
-	CORE_URL=https://github.com/SAQANet/SAQANet-core/releases/download/v$(core.version)
-else
-	CORE_URL=https://github.com/SAQANet/SAQANet-core/releases/download/draft
-endif
+CORE_URL=https://github.com/hiddify/hiddify-core/releases/download/v$(core.version)
 
 ifeq ($(CHANNEL),prod)
 	TARGET=lib/main_prod.dart

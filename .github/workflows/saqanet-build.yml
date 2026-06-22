@@ -39,13 +39,13 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: make windows-install-deps
+        run: make windows-install-deps CHANNEL=prod
 
       - name: Prepare
-        run: make windows-prepare
+        run: make windows-prepare CHANNEL=prod
 
       - name: Build Windows
-        run: make windows-exe-release windows-zip-release
+        run: make windows-exe-release windows-zip-release CHANNEL=prod
 
       - name: Collect artifacts
         shell: pwsh
@@ -80,13 +80,13 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: make macos-install-deps
+        run: make macos-install-deps CHANNEL=prod
 
       - name: Prepare
-        run: make macos-prepare
+        run: make macos-prepare CHANNEL=prod
 
       - name: Build macOS
-        run: make macos-release
+        run: make macos-release CHANNEL=prod
 
       - name: Collect artifacts
         run: |
