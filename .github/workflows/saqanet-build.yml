@@ -17,9 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FLUTTER_VERSION: '3.38.5'
   IS_GITHUB_ACTIONS: '1'
-  CHANNEL: 'prod'
   TAG_NAME: 'latest'
   UPLOAD_ARTIFACT: 'true'
   TARGET_NAME_exe: 'SAQANet-Windows-Setup-x64'
@@ -37,7 +35,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
@@ -79,7 +76,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
