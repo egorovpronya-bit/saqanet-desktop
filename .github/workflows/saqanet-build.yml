@@ -79,6 +79,9 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Upgrade sentry_flutter
+        run: flutter pub upgrade sentry_flutter
+
       - name: Install dependencies
         run: make macos-install-deps CHANNEL=prod
 
