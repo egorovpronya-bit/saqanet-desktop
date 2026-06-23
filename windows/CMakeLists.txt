@@ -10,6 +10,14 @@ set(BINARY_NAME "SAQANet")
 # versions of CMake.
 cmake_policy(SET CMP0063 NEW)
 
+# CMake 4.3 changed CMP0194: MSVC should not be used as ASM assembler.
+# sentry-native dependency doesn't set this policy, causing cmake_install to
+# exit with code 1 on VS 18 runners. Set OLD default so subprojects inherit it.
+if(POLICY CMP0194)
+  cmake_policy(SET CMP0194 OLD)
+endif()
+set(CMAKE_POLICY_DEFAULT_CMP0194 OLD)
+
 # Define build configuration option.
 get_property(IS_MULTICONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(IS_MULTICONFIG)
