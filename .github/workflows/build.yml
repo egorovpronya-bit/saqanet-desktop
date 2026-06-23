@@ -39,8 +39,8 @@ jobs:
       draftBuildCode: ${{ steps.draftBuildCode.outputs.datetime }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: subosito/flutter-action@v2.21.0 #issue with 2.13
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
@@ -116,7 +116,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Import Apple Codesign Certificates
         if: ${{ inputs.upload-artifact && startsWith(matrix.os,'macos') }}
@@ -147,7 +147,7 @@ jobs:
       #     flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2.21.0 #issue with 2.13
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           # flutter-version-file: pubspec.yaml
@@ -351,7 +351,7 @@ jobs:
 
       - name: Upload Artifact
         if: env.UPLOAD_ARTIFACT == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: ${{matrix.platform}}
           path: ./out
@@ -369,13 +369,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
       - name: Download Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           merge-multiple: true
           pattern: "*"
@@ -435,10 +435,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Download Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           merge-multiple: true
           pattern: "*"
@@ -488,7 +488,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           merge-multiple: true
           pattern: "*ios*"
