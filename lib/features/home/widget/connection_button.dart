@@ -247,7 +247,7 @@ class _ConnectionButton extends StatelessWidget {
                       if (useImage) {
                         return image.image();
                       } else {
-                        return Icon(Icons.power_settings_new, size: 64, color: value ?? const Color(0xFF3D4060));
+                        return Image.asset('assets/images/sn_logo.png');
                       }
                     },
                   ),

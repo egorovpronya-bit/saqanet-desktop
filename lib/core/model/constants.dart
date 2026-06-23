@@ -4,7 +4,7 @@ import 'package:hiddify/utils/utils.dart';
 
 abstract class Constants {
   static const appName = "SAQANet";
-  static const githubUrl = "https://github.com/egorovpronya-bit/saqanet-desktop";
+  static const githubUrl = "https://t.me/SAQANet_bot";
   static const licenseUrl = "https://saqanet.ru/license";
   static const githubReleasesApiUrl = "https://api.github.com/repos/egorovpronya-bit/saqanet-desktop/releases";
   static const githubLatestReleaseUrl = "https://github.com/egorovpronya-bit/saqanet-desktop/releases/latest";

@@ -95,7 +95,7 @@
   "intro": {
     "banner": "All you need for an unrestricted internet",
     "termsAndPolicyCaution(rich)": "By continuing you agree to ${tap(@:pages.about.termsAndConditions)}",
-    "info(rich)": "Made with ❤️ by Hiddify - ${tap_source(Open Source)} (${tap_license(License)})"
+    "info(rich)": "© 2026 SAQANet · ${tap_source(Telegram)} · ${tap_license(License)}"
   },
   "pages": {
     "home": {
@@ -639,11 +639,11 @@
       "disable": "Don't show again"
     },
     "noActiveProfile": {
-      "title": "Choose a profile",
-      "msg": "Let's get started by adding a connection profile that includes your VPN connection details.\n\nDon’t have a VPN server yet? No worries—just follow the tutorial below to set one up quickly and for free.",
+      "title": "Add a profile",
+      "msg": "Add a connection profile to get started.\n\nYou can get your access key from the SAQANet Telegram bot after subscribing.",
       "helpBtn": {
-        "label": "Show me how",
-        "url": "https://hiddify.com/manager/"
+        "label": "Open bot",
+        "url": "https://t.me/SAQANet_bot"
       }
     },
     "unknownDomainsWarning": {
