@@ -14,6 +14,8 @@ import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/model/region.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/features/common/general_pref_tiles.dart';
+import 'package:hiddify/features/per_app_proxy/model/per_app_proxy_mode.dart';
+import 'package:hiddify/features/per_app_proxy/overview/per_app_proxy_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hiddify/gen/assets.gen.dart';
@@ -187,6 +189,16 @@ class IntroPage extends HookConsumerWidget with PresLogger {
             }
           }
           await ref.read(Preferences.introCompleted.notifier).update(true);
+          // Auto-enable bypass for Russian apps when region is Russia
+          final region = ref.read(ConfigOptions.region);
+          if (region == Region.ru) {
+            try {
+              await ref.read(Preferences.perAppProxyMode.notifier).update(PerAppProxyMode.exclude);
+              await ref.read(PerAppProxy(AppProxyMode.exclude).notifier).applyAutoSelection();
+            } catch (e) {
+              loggy.warning('Could not auto-apply Russian bypass list', e);
+            }
+          }
         },
       ),
     );
