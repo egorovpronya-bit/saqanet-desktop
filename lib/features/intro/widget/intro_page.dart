@@ -189,16 +189,6 @@ class IntroPage extends HookConsumerWidget with PresLogger {
             }
           }
           await ref.read(Preferences.introCompleted.notifier).update(true);
-          // Auto-enable bypass for Russian apps when region is Russia
-          final region = ref.read(ConfigOptions.region);
-          if (region == Region.ru) {
-            try {
-              await ref.read(Preferences.perAppProxyMode.notifier).update(PerAppProxyMode.exclude);
-              await ref.read(PerAppProxy(AppProxyMode.exclude).notifier).applyAutoSelection();
-            } catch (e) {
-              loggy.warning('Could not auto-apply Russian bypass list', e);
-            }
-          }
         },
       ),
     );
