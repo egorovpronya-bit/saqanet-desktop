@@ -194,7 +194,7 @@ class IntroPage extends HookConsumerWidget with PresLogger {
           if (region == Region.ru) {
             try {
               await ref.read(Preferences.perAppProxyMode.notifier).update(PerAppProxyMode.exclude);
-              await ref.read(PerAppProxy(mode: AppProxyMode.exclude).notifier).applyAutoSelection();
+              await ref.read(PerAppProxy(AppProxyMode.exclude).notifier).applyAutoSelection();
             } catch (e) {
               loggy.warning('Could not auto-apply Russian bypass list', e);
             }
