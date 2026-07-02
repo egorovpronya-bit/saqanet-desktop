@@ -13,8 +13,10 @@ add_executable(${BINARY_NAME} WIN32
   "win32_window.cpp"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
   "Runner.rc"
-  "runner.exe.manifest"
 )
+
+# Embed manifest via rc.exe (RT_MANIFEST in Runner.rc) to avoid mt.exe LNK1327
+set_target_properties(${BINARY_NAME} PROPERTIES LINK_FLAGS "/MANIFEST:NO")
 
 # Apply the standard set of build settings. This can be removed for applications
 # that need different build settings.
