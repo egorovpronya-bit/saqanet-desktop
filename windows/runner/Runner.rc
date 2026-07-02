@@ -54,6 +54,12 @@ END
 // remains consistent on all systems.
 IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Manifest (embedded via rc.exe to avoid mt.exe LNK1327 in CI)
+//
+1                       RT_MANIFEST             "runner.exe.manifest"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
