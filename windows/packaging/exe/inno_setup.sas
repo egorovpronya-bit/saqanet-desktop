@@ -18,6 +18,7 @@ PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 CloseApplications=force
+UninstallDisplayIcon={app}\{{EXECUTABLE_NAME}}
 
 [Languages]
 {% for locale in LOCALES %}
