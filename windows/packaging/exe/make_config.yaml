@@ -2,6 +2,7 @@ app_id: 6L903538-42B1-4596-G479-BJ779F21A65D
 publisher: SAQANet
 publisher_url: https://saqanet.ru
 display_name: SAQANet
+executable_name: SAQANet.exe
 create_desktop_icon: true
 install_dir_name: "{autopf64}\\SAQANet"
 setup_icon_file: windows\runner\resources\app_icon.ico
