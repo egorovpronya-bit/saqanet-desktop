@@ -19,7 +19,7 @@ enum ServiceMode {
   final String key;
 
   static ServiceMode get defaultMode =>
-      Platform.isMacOS ? systemProxy : tun;
+      PlatformUtils.isDesktop ? systemProxy : tun;
 
   /// supported service mode based on platform, use this instead of [values] in UI
   static List<ServiceMode> get choices {
