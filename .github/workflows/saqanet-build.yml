@@ -2,7 +2,7 @@ name: SAQANet Build
 
 on:
   push:
-    branches: [main, clean-main]
+    branches: [main]
   workflow_dispatch:
     inputs:
       platform:
