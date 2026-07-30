@@ -83,16 +83,11 @@ class IntroPage extends HookConsumerWidget with PresLogger {
                           : constraints.maxWidth;
                       final size = width * 0.4;
                       return ClipOval(
-                        child: Container(
+                        child: Image.asset(
+                          'assets/images/sn_logo.png',
                           width: size,
                           height: size,
-                          color: const Color(0xFF455FE9),
-                          child: Padding(
-                            padding: EdgeInsets.all(size * 0.15),
-                            child: Assets.images.logo.svg(
-                              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                            ),
-                          ),
+                          fit: BoxFit.cover,
                         ),
                       );
                     },

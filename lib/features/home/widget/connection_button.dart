@@ -238,19 +238,9 @@ class _ConnectionButton extends StatelessWidget {
               child: InkWell(
                 focusColor: Colors.grey,
                 onTap: onTap,
-                child: Padding(
-                  padding: const EdgeInsets.all(36),
-                  child: TweenAnimationBuilder(
-                    tween: ColorTween(end: buttonColor),
-                    duration: const Duration(milliseconds: 250),
-                    builder: (context, value, child) {
-                      if (useImage) {
-                        return image.image();
-                      } else {
-                        return Assets.images.logo.svg(colorFilter: ColorFilter.mode(value!, BlendMode.srcIn));
-                      }
-                    },
-                  ),
+                child: Image.asset(
+                  'assets/images/sn_logo.png',
+                  fit: BoxFit.cover,
                 ),
               ),
             ).animate(target: enabled ? 0 : 1).blurXY(end: 1),
