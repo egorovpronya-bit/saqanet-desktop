@@ -5,7 +5,7 @@ display_name: SAQANet
 executable_name: SAQANet.exe
 create_desktop_icon: true
 install_dir_name: "{autopf64}\\SAQANet"
-setup_icon_file: windows\runner\resources\app_icon.ico
+setup_icon_file: app_icon.ico
 privileges_required: admin
 locales:
   - ar
