@@ -1,4 +1,8 @@
 
+# Apple API keys — never commit
+*.p8
+AuthKey_*.p8
+
 # Miscellaneous
 *.class
 *.log

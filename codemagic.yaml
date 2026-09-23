@@ -1,0 +1,50 @@
+workflows:
+  ios-testflight:
+    name: iOS TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 120
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: ru.saqanet.vpn,ru.saqanet.vpn.HiddifyPacketTunnel
+      flutter: 3.38.5
+      xcode: latest
+      cocoapods: default
+      vars:
+        XCODE_WORKSPACE: ios/Runner.xcworkspace
+        XCODE_SCHEME: Runner
+    scripts:
+      - name: Flutter packages and codegen
+        script: |
+          flutter pub get
+          dart run slang
+          dart run build_runner build --delete-conflicting-outputs
+      - name: Unpack iOS core
+        script: |
+          cd ios/Frameworks
+          unzip -o Libcore.xcframework.zip
+          rm -rf HiddifyCore.xcframework
+          mv Libcore.xcframework HiddifyCore.xcframework
+      - name: CocoaPods
+        script: |
+          cd ios
+          pod install
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build IPA
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - egorovpronya@gmail.com
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
