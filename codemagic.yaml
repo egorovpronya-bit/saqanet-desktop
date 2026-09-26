@@ -28,7 +28,7 @@ workflows:
       - name: CocoaPods
         script: |
           cd ios
-          pod install
+          pod update Sentry/HybridSDK --repo-update
       - name: Set up code signing
         script: |
           keychain initialize
