@@ -17,7 +17,7 @@ workflows:
         script: |
           flutter pub get
           dart run slang
-          dart run build_runner build --delete-conflicting-outputs
+          dart run build_runner build --delete-conflicting-outputs --low-resources-mode
       - name: Unpack iOS core
         script: |
           cd ios/Frameworks
