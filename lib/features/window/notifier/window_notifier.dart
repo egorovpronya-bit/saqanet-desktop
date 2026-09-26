@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
+import 'package:hiddify/features/window/window_size.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -11,9 +12,6 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 part 'window_notifier.g.dart';
-
-const minimumWindowSize = Size(368, 568);
-const defaultWindowSize = Size(868, 668);
 
 @Riverpod(keepAlive: true)
 class WindowNotifier extends _$WindowNotifier with AppLogger {
