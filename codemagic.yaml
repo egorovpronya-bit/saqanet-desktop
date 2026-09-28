@@ -32,12 +32,15 @@ workflows:
           pod install --repo-update
       - name: Set up code signing
         script: |
+          set -euo pipefail
           keychain initialize
-          app-store-connect fetch-signing-files \
-            "ru.saqanet.vpn" \
-            "ru.saqanet.vpn.HiddifyPacketTunnel" \
+          app-store-connect fetch-signing-files "ru.saqanet.vpn" \
             --type IOS_APP_STORE \
             --create
+          app-store-connect fetch-signing-files "ru.saqanet.vpn.HiddifyPacketTunnel" \
+            --type IOS_APP_STORE \
+            --create \
+            --strict-match-identifier
           keychain add-certificates
           flutter build ios --release --config-only
           python3 ios/ci_signing.py
