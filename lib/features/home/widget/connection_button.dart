@@ -234,7 +234,7 @@ class _ConnectionButton extends StatelessWidget {
             child: Material(
               key: const ValueKey("home_connection_button"),
               shape: const CircleBorder(),
-              color: Colors.white,
+              color: const Color(0xFF1A1A2E),
               child: InkWell(
                 focusColor: Colors.grey,
                 onTap: onTap,
@@ -247,7 +247,7 @@ class _ConnectionButton extends StatelessWidget {
                       if (useImage) {
                         return image.image();
                       } else {
-                        return Assets.images.logo.svg(colorFilter: ColorFilter.mode(value!, BlendMode.srcIn));
+                        return Icon(Icons.power_settings_new, size: 64, color: value ?? const Color(0xFF3D4060));
                       }
                     },
                   ),

@@ -1,7 +1,7 @@
 ﻿name: hiddify
 description: SAQANet - Secure Private VPN for Everyone.
 publish_to: "none"
-version: 4.1.2+40102
+version: 4.1.2+40103
 
 environment:
   sdk: ^3.10.4
@@ -144,6 +144,7 @@ flutter:
     # - assets/core/geoip.db
     # - assets/core/geosite.db
     - assets/images/logo.svg
+    - assets/images/sn_logo.png
     - assets/images/tray_icon.ico
     - assets/images/tray_icon.png
     - assets/images/tray_icon_dark.ico
@@ -174,11 +175,11 @@ flutter_gen:
     flutter_svg: true
 
 flutter_native_splash:
-  color: "#ffffff"
+  color: "#0A0A12"
   image: assets/images/source/ic_launcher_splash.png
   android_gravity: center
   android_12:
-    color: "#ffffff"
+    color: "#0A0A12"
     image: assets/images/source/ic_launcher_foreground.png
 
 ffigen:

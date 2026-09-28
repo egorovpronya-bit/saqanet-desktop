@@ -53,7 +53,7 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
 
     _status = LastStream(ValueConnectableStream(Rx.merge([status, alerts])).autoConnect());
     try {
-      await helloClient.sayHello(HelloRequest(name: "test"));
+      await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 4));
       loggy.info("core is already started!");
     } catch (e) {
       //core is not started yet
@@ -66,7 +66,7 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
         "mode": mode,
         "debug": debug,
       });
-      final res = await helloClient.sayHello(HelloRequest(name: "test"));
+      final res = await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 4));
       loggy.info(res.toString());
     }
 

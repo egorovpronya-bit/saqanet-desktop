@@ -9,7 +9,6 @@ import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
-import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -24,7 +23,9 @@ class HomePage extends HookConsumerWidget {
     final activeProfile = ref.watch(activeProfileProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFF0A0A12),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF0A0A12),
         // leading: (RootScaffold.stateKey.currentState?.hasDrawer ?? false) && showDrawerButton(context)
         //     ? DrawerButton(
         //         onPressed: () {
@@ -34,7 +35,7 @@ class HomePage extends HookConsumerWidget {
         //     : null,
         title: Row(
           children: [
-            Assets.images.logo.svg(height: 24),
+            Image.asset('assets/images/sn_logo.png', height: 28, width: 28),
             const Gap(8),
             Text.rich(
               TextSpan(

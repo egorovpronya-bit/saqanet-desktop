@@ -74,9 +74,7 @@ open class ExtensionProvider: NEPacketTunnelProvider {
             LibboxSetMemoryLimit(!disableMemoryLimit)
             
             writeMessage("(packet-tunnel) setup completed successfully")
-            if (config==""){
-                try await startService1(config, sharedDir: sharedDir, workDir: workDir, cacheDir: cacheDir, listen: listen)
-            }
+            try await startService1(config, sharedDir: sharedDir, workDir: workDir, cacheDir: cacheDir, listen: listen)
 
             
         } catch {
@@ -89,6 +87,8 @@ open class ExtensionProvider: NEPacketTunnelProvider {
     private func startService1(_ config: String, sharedDir: String, workDir: String, cacheDir: String, listen: String) async throws {
         writeMessage("Starting service")
         var error: NSError?
+        let configPath = FileManager.default.fileExists(atPath: config) ? config : ""
+        let configContent = configPath.isEmpty ? config : ""
         let started = MobileStart(
             sharedDir,
             workDir,
@@ -97,8 +97,8 @@ open class ExtensionProvider: NEPacketTunnelProvider {
             listen,
             "",
             false,
-            config,
-            "",
+            configContent,
+            configPath,
             platformInterface,
             &error
         )

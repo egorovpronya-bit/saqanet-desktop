@@ -433,7 +433,12 @@ class HiddifyCoreService with InfraLogger {
   // }
 
   Stream<CoreStatus> watchStatus() async* {
-    await startListeningStatus("bg", core.bgClient);
+    try {
+      await startListeningStatus("bg", core.bgClient).timeout(const Duration(seconds: 4));
+    } catch (e) {
+      loggy.warning("status listener did not start: $e");
+      yield const CoreStatus.stopped();
+    }
     yield* statusController.stream;
     // .endWith(const CoreStatus.stopped());
   }

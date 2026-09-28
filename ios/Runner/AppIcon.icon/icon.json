@@ -10,17 +10,14 @@
       "layers" : [
         {
           "blend-mode" : "normal",
-          "fill" : {
-            "solid" : "display-p3:0.29348,0.36978,0.88111,1.00000"
-          },
-          "glass" : true,
-          "image-name" : "logo.svg",
+          "glass" : false,
+          "image-name" : "logo.png",
           "name" : "logo",
           "position" : {
-            "scale" : 10,
+            "scale" : 1,
             "translation-in-points" : [
               0,
-              -14
+              0
             ]
           }
         }
@@ -37,10 +34,10 @@
         "kind" : "layer-color",
         "opacity" : 0.8
       },
-      "specular" : true,
+      "specular" : false,
       "translucency" : {
-        "enabled" : true,
-        "value" : 0.05
+        "enabled" : false,
+        "value" : 0
       }
     }
   ],
