@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Attach the fetched App Store profiles to the Xcode project.
 
-Codemagic downloads the profiles, but flutter build ipa still archives with
-automatic development signing unless each target names its profile. This
-replaces the placeholders in project.pbxproj and writes export_options.plist.
+Codemagic saves each profile under a temporary filename. Xcode only loads a
+profile whose filename is its UUID, so the archive reports that the named
+profile is missing. This copies both profiles to the UUID filename, replaces
+the placeholders in project.pbxproj, and writes export_options.plist.
 """
 
 import glob
@@ -18,6 +19,11 @@ BUNDLE_TUNNEL = "ru.saqanet.vpn.HiddifyPacketTunnel"
 APP_GROUP = "group.ru.saqanet.vpn"
 TEAM_ID = "RQLYK274UC"
 PBXPROJ = "ios/Runner.xcodeproj/project.pbxproj"
+XCCONFIG = "ios/Base.xcconfig"
+PROFILE_DIRS = (
+    "~/Library/Developer/Xcode/UserData/Provisioning Profiles",
+    "~/Library/MobileDevice/Provisioning Profiles",
+)
 REQUIRED = (
     ("com.apple.developer.networking.networkextension", "packet-tunnel-provider"),
     ("com.apple.developer.networking.vpn.api", "allow-vpn"),
@@ -67,8 +73,33 @@ def newest_profiles():
         created = profile.get("CreationDate") or datetime.min
         current = found.get(bundle)
         if current is None or created > current[0]:
-            found[bundle] = (created, profile.get("Name") or "", profile)
+            found[bundle] = (created, profile.get("Name") or "", profile, path)
     return found
+
+
+def team_of(profile):
+    teams = profile.get("TeamIdentifier") or []
+    if isinstance(teams, list) and teams:
+        return str(teams[0])
+    entitlements = profile.get("Entitlements") or {}
+    return str(entitlements.get("com.apple.developer.team-identifier") or "")
+
+
+def install_for_xcode(path, profile):
+    uuid = str(profile.get("UUID") or "")
+    if not uuid:
+        print("Profile has no UUID: " + path, file=sys.stderr)
+        return False
+    with open(path, "rb") as handle:
+        payload = handle.read()
+    for directory in PROFILE_DIRS:
+        folder = os.path.expanduser(directory)
+        os.makedirs(folder, exist_ok=True)
+        destination = os.path.join(folder, uuid + ".mobileprovision")
+        with open(destination, "wb") as handle:
+            handle.write(payload)
+        print("installed " + destination)
+    return True
 
 
 def entitlement_values(profile, key):
@@ -100,10 +131,10 @@ def profile_covers_app(bundle, profile):
         + BUNDLE_APP
         + " and "
         + BUNDLE_TUNNEL
-        + ". Enable Network Extensions with Packet Tunnel, enable Personal VPN, "
-        + "then App Groups → Configure → check "
+        + ". Enable Network Extensions, enable Personal VPN, then App Groups "
+        + "→ Configure → check "
         + APP_GROUP
-        + " → Save.",
+        + " → Save. Network Extensions has no Packet Tunnel checkbox on the website.",
         file=sys.stderr,
     )
     return False
@@ -129,6 +160,17 @@ def main():
         return 1
     if not profile_covers_app(BUNDLE_TUNNEL, found[BUNDLE_TUNNEL][2]):
         return 1
+    app_team = team_of(found[BUNDLE_APP][2])
+    tunnel_team = team_of(found[BUNDLE_TUNNEL][2])
+    print("App team: " + app_team)
+    print("Tunnel team: " + tunnel_team)
+    if not app_team or app_team != tunnel_team:
+        print("App and tunnel profiles do not share one Team ID", file=sys.stderr)
+        return 1
+    if not install_for_xcode(found[BUNDLE_APP][3], found[BUNDLE_APP][2]):
+        return 1
+    if not install_for_xcode(found[BUNDLE_TUNNEL][3], found[BUNDLE_TUNNEL][2]):
+        return 1
 
     with open(PBXPROJ, encoding="utf-8") as handle:
         project = handle.read()
@@ -137,6 +179,14 @@ def main():
         return 1
     project = project.replace("APP_STORE_PROFILE_APP", quoted(app_name))
     project = project.replace("APP_STORE_PROFILE_TUNNEL", quoted(tunnel_name))
+    if app_team != TEAM_ID:
+        print("Using profile Team ID " + app_team + " instead of " + TEAM_ID)
+        project = project.replace("DEVELOPMENT_TEAM = " + TEAM_ID, "DEVELOPMENT_TEAM = " + app_team)
+        with open(XCCONFIG, encoding="utf-8") as handle:
+            config = handle.read()
+        config = config.replace("DEVELOPMENT_TEAM=" + TEAM_ID, "DEVELOPMENT_TEAM=" + app_team)
+        with open(XCCONFIG, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(config)
     with open(PBXPROJ, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(project)
 
@@ -150,7 +200,7 @@ def main():
         },
         "signingCertificate": "Apple Distribution",
         "signingStyle": "manual",
-        "teamID": TEAM_ID,
+        "teamID": app_team,
         "uploadSymbols": True,
     }
     with open(export_path, "wb") as handle:
