@@ -67,10 +67,10 @@ public class MethodHandler: NSObject, FlutterPlugin {
                         let baseDir = args["baseDir"] as? String,
                         let workingDir = args["workingDir"] as? String,
                         let tempDir = args["tempDir"] as? String,
-                        let mode = args["mode"] as? Int,
-                        let grpcPort = args["grpcPort"] as? Int
+                        let mode = (args["mode"] as? NSNumber)?.intValue ?? args["mode"] as? Int,
+                        let grpcPort = (args["grpcPort"] as? NSNumber)?.intValue ?? args["grpcPort"] as? Int
                     else {
-                        result(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
+                        await mainResult(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
                         return
                     }
                     VPNConfig.shared.baseDir=baseDir
@@ -78,7 +78,7 @@ public class MethodHandler: NSObject, FlutterPlugin {
                     VPNConfig.shared.tempDir=tempDir
                     let debug = (args["debug"] as? NSNumber)?.boolValue ?? false
                     var error: NSError?
-                    MobileSetup(
+                    let setupOK = MobileSetup(
                         baseDir,
                         workingDir,
                         tempDir,
@@ -90,16 +90,20 @@ public class MethodHandler: NSObject, FlutterPlugin {
                     )
                     
                     if let error {
-                        result(FlutterError(code: String(error.code), message: error.localizedDescription, details: nil))
+                        await mainResult(FlutterError(code: String(error.code), message: error.localizedDescription, details: nil))
+                        return
+                    }
+                    if !setupOK {
+                        await mainResult(FlutterError(code: "SETUP", message: "MobileSetup failed", details: nil))
                         return
                     }
                     do {
                         try await VPNManager.shared.setup()
                     } catch {
-                        result(FlutterError(code: "SETUP", message: error.localizedDescription, details: nil))
+                        await mainResult(FlutterError(code: "SETUP", message: error.localizedDescription, details: nil))
                         return
                     }
-                    result(true)
+                    await mainResult(true)
                 }
         case "start":
             Task {
@@ -107,7 +111,7 @@ public class MethodHandler: NSObject, FlutterPlugin {
                     let args = call.arguments as? [String:Any?],
                     let path = args["path"] as? String,
                     let name = args["name"] as? String,
-                    let grpcPort=args["grpcPort"] as? Int
+                    let grpcPort = (args["grpcPort"] as? NSNumber)?.intValue ?? args["grpcPort"] as? Int
                 else {
                     await mainResult(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
                     return

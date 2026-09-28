@@ -6,5 +6,6 @@
 //
 
 BASE_BUNDLE_IDENTIFIER=ru.saqanet.vpn
-SERVICE_IDENTIFIER=ru.saqanet.vpn
+// Dart and Android call com.hiddify.app/*. The bundle id stays ru.saqanet.vpn.
+SERVICE_IDENTIFIER=com.hiddify.app
 DEVELOPMENT_TEAM=RQLYK274UC

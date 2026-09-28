@@ -89,15 +89,16 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
   await _init("translations", () => container.read(translationsProvider.future));
 
   await _safeInit("active profile", () => container.read(activeProfileProvider.future), timeout: 1000);
-  await _init(
+  await _safeInit(
     "chain profile extra security",
     () => container.read(chainProfileNotifierProvider(ChainType.extraSecurity).future),
+    timeout: 2000,
   );
-  await _init(
+  await _safeInit(
     "chain profile unblocker",
     () => container.read(chainProfileNotifierProvider(ChainType.unblocker).future),
+    timeout: 2000,
   );
-  await _safeInit("hiddify-core", () => container.read(hiddifyCoreServiceProvider).init());
 
   // Eagerly listen to activeProxyNotifierProvider to force synchronous evaluation in microtasks,
   // avoiding lazy build-phase flushes and sibling dependency collisions on the Home page.
@@ -135,7 +136,11 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
   if (!kIsWeb) {
     FlutterNativeSplash.remove();
   }
-  // SentryFlutter.s(DateTime.now().toUtc());
+
+  // Core setup talks to the packet tunnel. It must not run under the launch
+  // logo: a missing channel reply used to leave that logo up forever, and the
+  // iOS VPN permission sheet cannot be answered while the logo is on top.
+  unawaited(_safeInit("hiddify-core", () => container.read(hiddifyCoreServiceProvider).init()));
 }
 
 Future<T> _init<T>(String name, Future<T> Function() initializer, {int? timeout}) async {

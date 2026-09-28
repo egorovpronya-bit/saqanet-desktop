@@ -81,34 +81,24 @@ class VPNManager: ObservableObject {
     }
     
     func setup() async throws {
-        // guard !loaded else { return }
         loaded = true
-        do {
-            try await loadVPNPreference()
-        } catch {
-            print(error.localizedDescription)
-        }
     }
     
     private func loadVPNPreference() async throws {
-        do {
-            let managers = try await NETunnelProviderManager.loadAllFromPreferences()
-            if let manager = managers.first {
-                self.manager = manager
-                return
-            }
-            let newManager = NETunnelProviderManager()
-            let `protocol` = NETunnelProviderProtocol()
-            `protocol`.providerBundleIdentifier = Bundle.main.baseBundleIdentifier + ".HiddifyPacketTunnel"
-            `protocol`.serverAddress = "localhost"
-            newManager.protocolConfiguration = `protocol`
-            newManager.localizedDescription = "Hiddify"
-            try await newManager.saveToPreferences()
-            try await newManager.loadFromPreferences()
-            self.manager = newManager
-        } catch {
-            print(error.localizedDescription)	
+        let managers = try await NETunnelProviderManager.loadAllFromPreferences()
+        if let manager = managers.first {
+            self.manager = manager
+            return
         }
+        let newManager = NETunnelProviderManager()
+        let `protocol` = NETunnelProviderProtocol()
+        `protocol`.providerBundleIdentifier = Bundle.main.baseBundleIdentifier + ".HiddifyPacketTunnel"
+        `protocol`.serverAddress = "localhost"
+        newManager.protocolConfiguration = `protocol`
+        newManager.localizedDescription = "SAQANet"
+        try await newManager.saveToPreferences()
+        try await newManager.loadFromPreferences()
+        self.manager = newManager
     }
     
     private func enableVPNManager() async throws {
@@ -204,6 +194,7 @@ class VPNManager: ObservableObject {
         await set(upload: 0, download: 0)
 //        guard state == .disconnected else { return }
         do {
+            try await loadVPNPreference()
             try await enableVPNManager()
             try manager.connection.startVPNTunnel(options: [
                 "Config": config as NSString,
