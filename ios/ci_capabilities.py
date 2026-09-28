@@ -7,6 +7,7 @@ extra settings. App Groups must name group.ru.saqanet.vpn.
 """
 
 import os
+import pathlib
 import re
 import shutil
 import subprocess
@@ -127,23 +128,118 @@ def normalize_pem(raw):
     return pem
 
 
-def api_private_key():
-    raw = os.environ.get("APP_STORE_CONNECT_PRIVATE_KEY", "")
-    if not raw.strip():
-        print("App Store Connect integration did not provide APP_STORE_CONNECT_PRIVATE_KEY.")
-        sys.exit(1)
+def _pem_from_text(raw):
+    if not raw or not raw.strip():
+        return None
     try:
         return normalize_pem(raw)
     except Exception:
-        newline_count = raw.count("\n")
-        literal_newlines = raw.count("\\n")
-        print(
-            "The codemagic integration key is not a readable .p8 "
-            f"(length {len(raw)}, newlines {newline_count}, literal \\\\n {literal_newlines})."
-        )
-        print("Open Team settings, Integrations, the key named codemagic,")
-        print("and paste AuthKey_VR9NV2T5W6.p8 again, including the BEGIN and END lines.")
-        sys.exit(1)
+        return None
+
+
+def _read_pem_file(path):
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    return _pem_from_text(text)
+
+
+def _key_files():
+    key_id = os.environ.get("APP_STORE_CONNECT_KEY_IDENTIFIER", "").strip()
+    patterns = []
+    if key_id and re.fullmatch(r"[A-Za-z0-9]+", key_id):
+        patterns.append(f"AuthKey_{key_id}.p8")
+    patterns.append("AuthKey_*.p8")
+    patterns.append("*.p8")
+    roots = (
+        pathlib.Path("private_keys"),
+        pathlib.Path.home() / "private_keys",
+        pathlib.Path.home() / ".private_keys",
+        pathlib.Path.home() / ".appstoreconnect" / "private_keys",
+        pathlib.Path("/Users/builder/private_keys"),
+        pathlib.Path("/Users/builder/.private_keys"),
+        pathlib.Path("/Users/builder/.appstoreconnect/private_keys"),
+        pathlib.Path("/Users/builder/Library/codemagic-cli-tools"),
+        pathlib.Path("/Users/builder/clone/private_keys"),
+    )
+    seen = set()
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for pattern in patterns:
+            for path in root.glob(pattern):
+                if not path.is_file():
+                    continue
+                resolved = str(path.resolve())
+                if resolved in seen:
+                    continue
+                seen.add(resolved)
+                yield path
+
+
+def _secret_shape(raw):
+    flags = []
+    if "-----BEGIN" in raw:
+        flags.append("has BEGIN")
+    if raw.startswith("/") or raw.startswith("~") or raw.startswith("@file:"):
+        flags.append("looks like a path")
+    compact = re.sub(r"\s+", "", raw)
+    if compact and re.fullmatch(r"[A-Za-z0-9+/=]+", compact):
+        flags.append("base64 characters only")
+    return ", ".join(flags) if flags else "no PEM markers"
+
+
+def _pem_from_path_value(raw):
+    path_text = raw.strip()
+    if path_text.startswith("@file:"):
+        path_text = path_text[len("@file:") :]
+    if not path_text.startswith(("/", "~")):
+        return None
+    return _read_pem_file(pathlib.Path(path_text).expanduser())
+
+
+def api_private_key():
+    for name in ("ASC_API_KEY_P8", "APP_STORE_CONNECT_PRIVATE_KEY"):
+        raw = os.environ.get(name, "")
+        pem = _pem_from_text(raw) or _pem_from_path_value(raw)
+        if pem:
+            if name != "APP_STORE_CONNECT_PRIVATE_KEY":
+                print(f"using {name} as the App Store Connect API key")
+            return pem
+
+    found = []
+    for path in _key_files():
+        found.append(path)
+        pem = _read_pem_file(path)
+        if pem:
+            print(f"using API key file {path} ({path.stat().st_size} bytes)")
+            return pem
+
+    raw = os.environ.get("APP_STORE_CONNECT_PRIVATE_KEY", "")
+    extra = os.environ.get("ASC_API_KEY_P8", "")
+    print(
+        "The App Store Connect API key is not a readable .p8 "
+        f"(APP_STORE_CONNECT_PRIVATE_KEY length {len(raw)}, "
+        f"newlines {raw.count(chr(10))}, literal backslash-n {raw.count(chr(92) + 'n')}, "
+        f"{_secret_shape(raw)})."
+    )
+    print(f"ASC_API_KEY_P8 length {len(extra)}.")
+    print(
+        "Key ID length "
+        f"{len(os.environ.get('APP_STORE_CONNECT_KEY_IDENTIFIER', ''))}. "
+        "Issuer ID length "
+        f"{len(os.environ.get('APP_STORE_CONNECT_ISSUER_ID', ''))}."
+    )
+    if found:
+        for path in found:
+            print(f"found {path} ({path.stat().st_size} bytes) but it is not a readable API key")
+    else:
+        print("No AuthKey .p8 file was on the build machine.")
+    print("On the app Environment variables page, group code-signing,")
+    print("add secret ASC_API_KEY_P8 with the full AuthKey_VR9NV2T5W6.p8 text,")
+    print("including the BEGIN and END lines.")
+    sys.exit(1)
 
 
 def client_from_env():
