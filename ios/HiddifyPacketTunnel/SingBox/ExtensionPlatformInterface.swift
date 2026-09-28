@@ -227,8 +227,8 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
     }
 
-    public func packageName(byUid _: Int32) throws -> String {
-        throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
+    public func packageName(byUid _: Int32, error _: NSErrorPointer) -> String {
+        ""
     }
 
     public func uid(byPackageName _: String?, ret0_ _: UnsafeMutablePointer<Int32>?) throws {
