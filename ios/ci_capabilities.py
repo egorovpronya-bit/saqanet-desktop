@@ -2,8 +2,9 @@
 """Enable the VPN capabilities on both bundle IDs before profiles are created.
 
 App Store profiles only allow the entitlements that were on the App ID at the
-moment the profile was created. Network Extensions and Personal VPN have no
-extra settings. App Groups must name group.ru.saqanet.vpn.
+moment the profile was created. The public API can turn Network Extensions,
+Personal VPN, and App Groups on, but it rejects a group identifier in
+settings. group.ru.saqanet.vpn is chosen on developer.apple.com.
 """
 
 import os
@@ -82,12 +83,6 @@ APP_ID = "ru.saqanet.vpn"
 TUNNEL_ID = "ru.saqanet.vpn.HiddifyPacketTunnel"
 APP_GROUP = "group.ru.saqanet.vpn"
 CAPABILITIES = ("NETWORK_EXTENSIONS", "PERSONAL_VPN", "APP_GROUPS")
-APP_GROUP_SETTINGS = [
-    {
-        "key": "APP_GROUP_IDS",
-        "options": [{"key": APP_GROUP, "enabled": True}],
-    }
-]
 
 
 def normalize_pem(raw):
@@ -275,14 +270,27 @@ def capability_rows(client, bundle_resource_id):
     return list(client.paginate(url, page_size=None))
 
 
+def capability_note(row):
+    settings = (row.get("attributes") or {}).get("settings") or []
+    parts = []
+    for setting in settings:
+        if not isinstance(setting, dict):
+            continue
+        options = setting.get("options") or []
+        option_keys = [
+            option.get("key")
+            for option in options
+            if isinstance(option, dict) and option.get("key")
+        ]
+        parts.append(f"{setting.get('key')}={option_keys}")
+    return ", ".join(parts) if parts else "no settings"
+
+
 def post_capability(client, bundle_resource_id, capability_type):
-    attributes = {"capabilityType": capability_type}
-    if capability_type == "APP_GROUPS":
-        attributes["settings"] = APP_GROUP_SETTINGS
     payload = {
         "data": {
             "type": "bundleIdCapabilities",
-            "attributes": attributes,
+            "attributes": {"capabilityType": capability_type},
             "relationships": {
                 "bundleId": {
                     "data": {"type": "bundleIds", "id": bundle_resource_id},
@@ -293,45 +301,40 @@ def post_capability(client, bundle_resource_id, capability_type):
     client.session.post(f"{client.API_URL}/bundleIdCapabilities", json=payload)
 
 
-def patch_app_group(client, capability_id):
-    payload = {
-        "data": {
-            "type": "bundleIdCapabilities",
-            "id": capability_id,
-            "attributes": {
-                "capabilityType": "APP_GROUPS",
-                "settings": APP_GROUP_SETTINGS,
-            },
-        }
-    }
-    client.session.patch(
-        f"{client.API_URL}/bundleIdCapabilities/{capability_id}",
-        json=payload,
-    )
-
-
 def enable(client, bundle_id):
     resource_id = bundle_id.id
     identifier = bundle_id.attributes.identifier
+    rows = capability_rows(client, resource_id)
+    by_type = {
+        row.get("attributes", {}).get("capabilityType"): row
+        for row in rows
+    }
     for capability_type in CAPABILITIES:
+        existing = by_type.get(capability_type)
+        if existing:
+            print(
+                f"{capability_type} already enabled on {identifier} "
+                f"({capability_note(existing)})"
+            )
+            continue
         try:
             post_capability(client, resource_id, capability_type)
-            print(f"enabled {capability_type} on {identifier}")
         except AppStoreConnectApiError as err:
             rows = capability_rows(client, resource_id)
-            existing = [
-                row
+            by_type = {
+                row.get("attributes", {}).get("capabilityType"): row
                 for row in rows
-                if row.get("attributes", {}).get("capabilityType") == capability_type
-            ]
-            if not existing:
+            }
+            if capability_type not in by_type:
                 print(f"failed to enable {capability_type} on {identifier}: {err}")
                 raise
-            if capability_type == "APP_GROUPS":
-                patch_app_group(client, existing[0]["id"])
-                print(f"updated APP_GROUPS on {identifier}")
-            else:
-                print(f"{capability_type} already enabled on {identifier}")
+            print(f"{capability_type} already enabled on {identifier}")
+            continue
+        print(f"enabled {capability_type} on {identifier}")
+    print(
+        f"{identifier}: confirm {APP_GROUP} on developer.apple.com → "
+        "Identifiers → App Groups → Configure. The API cannot set that checkbox."
+    )
 
 
 def delete_app_store_profiles(client, bundle_id):

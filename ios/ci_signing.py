@@ -15,8 +15,14 @@ from datetime import datetime
 
 BUNDLE_APP = "ru.saqanet.vpn"
 BUNDLE_TUNNEL = "ru.saqanet.vpn.HiddifyPacketTunnel"
+APP_GROUP = "group.ru.saqanet.vpn"
 TEAM_ID = "RQLYK274UC"
 PBXPROJ = "ios/Runner.xcodeproj/project.pbxproj"
+REQUIRED = (
+    ("com.apple.developer.networking.networkextension", "packet-tunnel-provider"),
+    ("com.apple.developer.networking.vpn.api", "allow-vpn"),
+    ("com.apple.security.application-groups", APP_GROUP),
+)
 
 
 def profile_paths():
@@ -61,8 +67,46 @@ def newest_profiles():
         created = profile.get("CreationDate") or datetime.min
         current = found.get(bundle)
         if current is None or created > current[0]:
-            found[bundle] = (created, profile.get("Name") or "")
+            found[bundle] = (created, profile.get("Name") or "", profile)
     return found
+
+
+def entitlement_values(profile, key):
+    value = (profile.get("Entitlements") or {}).get(key)
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, str)]
+    return []
+
+
+def profile_covers_app(bundle, profile):
+    entitlements = profile.get("Entitlements") or {}
+    print(bundle + " entitlement keys: " + ", ".join(sorted(entitlements)))
+    missing = []
+    for key, required in REQUIRED:
+        values = entitlement_values(profile, key)
+        print(bundle + " " + key + ": " + (", ".join(values) or "(none)"))
+        if required not in values:
+            missing.append(required)
+    if not missing:
+        return True
+    print(
+        "Profile for " + bundle + " is missing: " + ", ".join(missing),
+        file=sys.stderr,
+    )
+    print(
+        "On developer.apple.com open Identifiers and edit both "
+        + BUNDLE_APP
+        + " and "
+        + BUNDLE_TUNNEL
+        + ". Enable Network Extensions with Packet Tunnel, enable Personal VPN, "
+        + "then App Groups → Configure → check "
+        + APP_GROUP
+        + " → Save.",
+        file=sys.stderr,
+    )
+    return False
 
 
 def quoted(name):
@@ -81,6 +125,10 @@ def main():
     tunnel_name = found[BUNDLE_TUNNEL][1]
     print("App profile: " + app_name)
     print("Tunnel profile: " + tunnel_name)
+    if not profile_covers_app(BUNDLE_APP, found[BUNDLE_APP][2]):
+        return 1
+    if not profile_covers_app(BUNDLE_TUNNEL, found[BUNDLE_TUNNEL][2]):
+        return 1
 
     with open(PBXPROJ, encoding="utf-8") as handle:
         project = handle.read()
