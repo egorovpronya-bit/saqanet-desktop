@@ -1,5 +1,5 @@
 import Foundation
-import HiddifyCore
+import Libcore
 import NetworkExtension
 import os.log
 

@@ -11,15 +11,15 @@ let package = Package(
      ],
      products: [
          .library(
-             name: "HiddifyCore",
-             targets: ["HiddifyCore"]),
+             name: "Libcore",
+             targets: ["Libcore"]),
      ],
      dependencies: [
          // No dependencies
      ],
      targets: [
         .binaryTarget(
-            name: "HiddifyCore",
+            name: "Libcore",
             path: "../Frameworks/HiddifyCore.xcframework"
         )
      ]

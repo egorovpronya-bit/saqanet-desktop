@@ -7,7 +7,7 @@
 
 import Flutter
 import Combine
-import HiddifyCore
+import Libcore
 
 public class PlatformMethodHandler: NSObject, FlutterPlugin {
         
