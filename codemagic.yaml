@@ -39,7 +39,8 @@ workflows:
             --type IOS_APP_STORE \
             --create
           keychain add-certificates
-          xcode-project use-profiles
+          flutter build ios --release --config-only
+          python3 ios/ci_signing.py
       - name: Build IPA
         script: |
           flutter build ipa --release \
