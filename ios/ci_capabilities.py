@@ -7,7 +7,70 @@ extra settings. App Groups must name group.ru.saqanet.vpn.
 """
 
 import os
+import shutil
+import subprocess
 import sys
+
+
+def _python_with_codemagic():
+    """The builder's python3 does not have the Codemagic package. The CLI does."""
+    if os.environ.get("SAQANET_CM_PYTHON_REEXEC") == "1":
+        return None
+    asc = shutil.which("app-store-connect")
+    if not asc:
+        return None
+    candidates = []
+    try:
+        with open(asc, "r", encoding="utf-8", errors="replace") as handle:
+            first = handle.readline().strip()
+    except OSError:
+        first = ""
+    if first.startswith("#!"):
+        parts = first[2:].strip().split()
+        if parts and os.path.basename(parts[0]) == "env" and len(parts) > 1:
+            found = shutil.which(parts[1])
+            if found:
+                candidates.append(found)
+        elif parts and os.path.isfile(parts[0]):
+            candidates.append(parts[0])
+    bindir = os.path.dirname(os.path.realpath(asc))
+    for name in ("python3", "python"):
+        path = os.path.join(bindir, name)
+        if os.path.isfile(path):
+            candidates.append(path)
+    current = os.path.realpath(sys.executable)
+    for candidate in candidates:
+        if os.path.realpath(candidate) == current:
+            continue
+        probe = subprocess.run(
+            [candidate, "-c", "import codemagic"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        if probe.returncode == 0:
+            return candidate
+    return None
+
+
+def _ensure_codemagic_importable():
+    try:
+        import codemagic  # noqa: F401
+    except ModuleNotFoundError:
+        executable = _python_with_codemagic()
+        if not executable:
+            print(
+                "python3 has no codemagic package, and the app-store-connect "
+                "interpreter could not be found."
+            )
+            sys.exit(1)
+        print(f"python3 has no codemagic package; retrying with {executable}")
+        env = os.environ.copy()
+        env["SAQANET_CM_PYTHON_REEXEC"] = "1"
+        os.execve(executable, [executable, os.path.abspath(__file__), *sys.argv[1:]], env)
+
+
+_ensure_codemagic_importable()
 
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect.api_error import AppStoreConnectApiError
