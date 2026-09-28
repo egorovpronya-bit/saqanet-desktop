@@ -50,25 +50,24 @@ open class ExtensionProvider: NEPacketTunnelProvider {
             if platformInterface == nil {
                 platformInterface = ExtensionPlatformInterface(self)
             }
-            // Initialize mobile setup with error handling
+            // Libcore 3.1.8: MobileSetup(base, working, temp, mode, listen, secret, debug, &error)
             var setupError: NSError?
-            let opts = MobileSetupOptions()
-            opts.basePath = sharedDir
-            opts.workingDir = workDir
-            opts.tempDir = cacheDir
-            opts.listen = "127.0.0.1:\(grpcServiceModePort)"
-            opts.secret = ""
-            opts.debug = false
-            opts.mode = 4
-            opts.fixAndroidStack = false
-
-            MobileSetup(opts,
-                platformInterface,
+            let listen = "127.0.0.1:\(grpcServiceModePort)"
+            let setupOK = MobileSetup(
+                sharedDir,
+                workDir,
+                cacheDir,
+                4,
+                listen,
+                "",
+                false,
                 &setupError
             )
-            
-            if let setupError = setupError {
+            if let setupError {
                 throw setupError
+            }
+            if !setupOK {
+                throw NSError(domain: "MobileSetup", code: 0, userInfo: [NSLocalizedDescriptionKey: "MobileSetup failed"])
             }
             
             
@@ -76,7 +75,7 @@ open class ExtensionProvider: NEPacketTunnelProvider {
             
             writeMessage("(packet-tunnel) setup completed successfully")
             if (config==""){
-                try await startService1(config)
+                try await startService1(config, sharedDir: sharedDir, workDir: workDir, cacheDir: cacheDir, listen: listen)
             }
 
             
@@ -87,20 +86,32 @@ open class ExtensionProvider: NEPacketTunnelProvider {
         }
     }
     
-    private func startService1(_ config: String) async throws {
+    private func startService1(_ config: String, sharedDir: String, workDir: String, cacheDir: String, listen: String) async throws {
         writeMessage("Starting service")
         var error: NSError?
-//        
-        do {
-            try MobileStart(config, "", &error)
-            if let error = error {
-                throw error
-            }
-            writeMessage("(packet-tunnel) service started successfully")
-        } catch {
+        let started = MobileStart(
+            sharedDir,
+            workDir,
+            cacheDir,
+            4,
+            listen,
+            "",
+            false,
+            config,
+            "",
+            platformInterface,
+            &error
+        )
+        if let error {
             writeFatalError("(packet-tunnel) error: start service: \(error.localizedDescription)")
             throw error
         }
+        if !started {
+            let failed = NSError(domain: "MobileStart", code: 0, userInfo: [NSLocalizedDescriptionKey: "MobileStart failed"])
+            writeFatalError("(packet-tunnel) error: start service: \(failed.localizedDescription)")
+            throw failed
+        }
+        writeMessage("(packet-tunnel) service started successfully")
     }
     
     private func createRequiredDirectories() throws {
@@ -170,7 +181,8 @@ open class ExtensionProvider: NEPacketTunnelProvider {
     
     private func stopService() {
         logger.debug("Stopping service")
-        MobileClose(4)
+        var stopError: NSError?
+        MobileStop(&stopError)
         if let platformInterface {
             platformInterface.reset()
         }
@@ -207,8 +219,6 @@ open class ExtensionProvider: NEPacketTunnelProvider {
     
     override open func wake() {
         logger.debug("Waking from sleep")
-        MobileWake()
-        // Add any wake handling if needed
     }
 }
 

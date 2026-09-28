@@ -46,7 +46,7 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
             settings.mtu = NSNumber(value: options.getMTU())
 
            let dnsServer = try options.getDNSServerAddress()
-            let dnsSettings = NEDNSSettings(servers: [dnsServer.value,"fdfe:dcba:9876::1"])
+            let dnsSettings = NEDNSSettings(servers: [dnsServer, "fdfe:dcba:9876::1"])
             dnsSettings.matchDomains = [""]
             dnsSettings.matchDomainsNoSearch = true
             settings.dnsSettings = dnsSettings
@@ -213,32 +213,30 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         }
     }
 
-    public func usePlatformAutoDetectControl() -> Bool {
+    public func usePlatformAutoDetectInterfaceControl() -> Bool {
         false
     }
-    public func findConnectionOwner(_ ipProtocol: Int32, sourceAddress: String?, sourcePort: Int32, destinationAddress: String?, destinationPort: Int32) throws -> LibboxConnectionOwner {
-        #if os(macOS)
-            if Variant.useSystemExtension {
-                guard let sourceAddress, let destinationAddress else {
-                    throw NSError(domain: "findConnectionOwner", code: 0, userInfo: [
-                        NSLocalizedDescriptionKey: "Missing source or destination address",
-                    ])
-                }
-                let owner = try RootHelperClient.shared.findConnectionOwner(
-                    ipProtocol: ipProtocol,
-                    sourceAddress: sourceAddress,
-                    sourcePort: sourcePort,
-                    destinationAddress: destinationAddress,
-                    destinationPort: destinationPort
-                )
-                let result = LibboxConnectionOwner()
-                result.userId = owner.userId
-                result.userName = owner.userName
-                result.processPath = owner.processPath
-                return result
-            }
-        #endif
-        throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: String(localized: "Not implemented")])
+
+    public func autoDetectInterfaceControl(_: Int32) throws {}
+
+    public func findConnectionOwner(_: Int32, sourceAddress _: String?, sourcePort _: Int32, destinationAddress _: String?, destinationPort _: Int32, ret0_ _: UnsafeMutablePointer<Int32>?) throws {
+        throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
+    }
+
+    public func packageName(byUid _: Int32) throws -> String {
+        throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
+    }
+
+    public func uid(byPackageName _: String?, ret0_ _: UnsafeMutablePointer<Int32>?) throws {
+        throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
+    }
+
+    public func usePlatformDefaultInterfaceMonitor() -> Bool {
+        false
+    }
+
+    public func usePlatformInterfaceGetter() -> Bool {
+        false
     }
 
     public func useProcFS() -> Bool {
@@ -278,10 +276,10 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         guard path.status != .unsatisfied,
               let defaultInterface = path.availableInterfaces.first
         else {
-            listener.updateDefaultInterface("", interfaceIndex: -1, isExpensive: false, isConstrained: false)
+            listener.updateDefaultInterface("", interfaceIndex: -1)
             return
         }
-        listener.updateDefaultInterface(defaultInterface.name, interfaceIndex: Int32(defaultInterface.index), isExpensive: path.isExpensive, isConstrained: path.isConstrained)
+        listener.updateDefaultInterface(defaultInterface.name, interfaceIndex: Int32(defaultInterface.index))
     }
 
     public func closeDefaultInterfaceMonitor(_: LibboxInterfaceUpdateListenerProtocol?) throws {
@@ -289,33 +287,8 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         nwMonitor = nil
     }
 
-    public func getInterfaces() throws -> LibboxNetworkInterfaceIteratorProtocol {
+    public func getInterfaces() throws -> LibboxNetworkInterfaceIteratorProtocol? {
         throw NSError(domain: "not implemented", code: 0)
-        guard let nwMonitor else {
-            throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: String(localized: "NWMonitor not started")])
-        }
-        let path = nwMonitor.currentPath
-        if path.status == .unsatisfied {
-            return networkInterfaceArray([])
-        }
-        var interfaces: [LibboxNetworkInterface] = []
-        for it in path.availableInterfaces {
-            let interface = LibboxNetworkInterface()
-            interface.name = it.name
-            interface.index = Int32(it.index)
-            switch it.type {
-            case .wifi:
-                interface.type = LibboxInterfaceTypeWIFI
-            case .cellular:
-                interface.type = LibboxInterfaceTypeCellular
-            case .wiredEthernet:
-                interface.type = LibboxInterfaceTypeEthernet
-            default:
-                interface.type = LibboxInterfaceTypeOther
-            }
-            interfaces.append(interface)
-        }
-        return networkInterfaceArray(interfaces)
     }
 
     class networkInterfaceArray: NSObject, LibboxNetworkInterfaceIteratorProtocol {
@@ -469,36 +442,6 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         nwMonitor = nil
     }
 
-    public func send(_ notification: LibboxNotification?) throws {
-        #if !os(tvOS)
-            guard let notification else {
-                return
-            }
-            #if os(macOS)
-                if Variant.useSystemExtension {
-                    try UserServiceClient.shared.sendNotification(notification)
-                    return
-                }
-            #endif
-//            let center = UNUserNotificationCenter.current()
-//            let content = UNMutableNotificationContent()
-//
-//            content.title = notification.title
-//            content.subtitle = notification.subtitle
-//            content.body = notification.body
-//            if !notification.openURL.isEmpty {
-//                content.userInfo["OPEN_URL"] = notification.openURL
-//                content.categoryIdentifier = "OPEN_URL"
-//            }
-//            content.interruptionLevel = .active
-//            let request = UNNotificationRequest(identifier: notification.identifier, content: content, trigger: nil)
-//            try runBlocking {
-//                try await center.requestAuthorization(options: [.alert])
-//                try await center.add(request)
-//            }
-        #endif
-    }
-
     public func localDNSTransport() -> (any LibboxLocalDNSTransportProtocol)? {
         nil
     }
@@ -506,6 +449,5 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
     public func systemCertificates() -> (any LibboxStringIteratorProtocol)? {
         nil
     }
-    public func autoDetectControl(_: Int32) throws {}
 
 }

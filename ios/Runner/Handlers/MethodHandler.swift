@@ -76,18 +76,16 @@ public class MethodHandler: NSObject, FlutterPlugin {
                     VPNConfig.shared.baseDir=baseDir
                     VPNConfig.shared.workingDir=workingDir
                     VPNConfig.shared.tempDir=tempDir
+                    let debug = (args["debug"] as? NSNumber)?.boolValue ?? false
                     var error: NSError?
-                    let opts = MobileSetupOptions()
-                    opts.basePath = baseDir
-                    opts.workingDir = workingDir
-                    opts.tempDir = tempDir
-                    opts.listen = "127.0.0.1:\(grpcPort)"
-                    opts.secret = ""
-                    opts.debug = false
-                    opts.mode = 4
-                    opts.fixAndroidStack = false
-                    MobileSetup(opts,
-                        nil,
+                    MobileSetup(
+                        baseDir,
+                        workingDir,
+                        tempDir,
+                        mode,
+                        "127.0.0.1:\(grpcPort)",
+                        "",
+                        debug,
                         &error
                     )
                     
