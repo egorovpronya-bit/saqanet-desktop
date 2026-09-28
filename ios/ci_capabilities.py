@@ -7,6 +7,7 @@ extra settings. App Groups must name group.ru.saqanet.vpn.
 """
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -88,11 +89,67 @@ APP_GROUP_SETTINGS = [
 ]
 
 
+def normalize_pem(raw):
+    """Codemagic often stores the .p8 with literal \\n or spaces instead of newlines."""
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.primitives.serialization import load_pem_private_key
+
+    text = raw.replace("\ufeff", "").strip()
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in {'"', "'"}:
+        text = text[1:-1].strip()
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = text.replace("\\r\\n", "\n").replace("\\n", "\n").strip()
+    if "-----BEGIN" not in text:
+        import base64
+
+        compact = re.sub(r"\s+", "", text)
+        try:
+            decoded = base64.b64decode(compact, validate=False)
+        except Exception:
+            decoded = b""
+        if decoded.startswith(b"-----BEGIN"):
+            text = decoded.decode("utf-8", "replace")
+        elif decoded:
+            body = base64.b64encode(decoded).decode("ascii")
+            chunks = "\n".join(body[i : i + 64] for i in range(0, len(body), 64))
+            text = f"-----BEGIN PRIVATE KEY-----\n{chunks}\n-----END PRIVATE KEY-----\n"
+    begin = re.search(r"-----BEGIN ([A-Z0-9 ]+)-----", text)
+    end = re.search(r"-----END ([A-Z0-9 ]+)-----", text)
+    if not begin or not end or end.start() <= begin.end():
+        raise ValueError("PEM markers missing")
+    kind = begin.group(1)
+    body = re.sub(r"[^A-Za-z0-9+/=]", "", text[begin.end() : end.start()])
+    chunks = "\n".join(body[i : i + 64] for i in range(0, len(body), 64))
+    pem = f"-----BEGIN {kind}-----\n{chunks}\n-----END {kind}-----\n"
+    key = load_pem_private_key(pem.encode(), password=None)
+    if not isinstance(key, ec.EllipticCurvePrivateKey):
+        raise ValueError("not an App Store Connect API key")
+    return pem
+
+
+def api_private_key():
+    raw = os.environ.get("APP_STORE_CONNECT_PRIVATE_KEY", "")
+    if not raw.strip():
+        print("App Store Connect integration did not provide APP_STORE_CONNECT_PRIVATE_KEY.")
+        sys.exit(1)
+    try:
+        return normalize_pem(raw)
+    except Exception:
+        newline_count = raw.count("\n")
+        literal_newlines = raw.count("\\n")
+        print(
+            "The codemagic integration key is not a readable .p8 "
+            f"(length {len(raw)}, newlines {newline_count}, literal \\\\n {literal_newlines})."
+        )
+        print("Open Team settings, Integrations, the key named codemagic,")
+        print("and paste AuthKey_VR9NV2T5W6.p8 again, including the BEGIN and END lines.")
+        sys.exit(1)
+
+
 def client_from_env():
     names = (
         "APP_STORE_CONNECT_KEY_IDENTIFIER",
         "APP_STORE_CONNECT_ISSUER_ID",
-        "APP_STORE_CONNECT_PRIVATE_KEY",
     )
     missing = [name for name in names if not os.environ.get(name)]
     if missing:
@@ -101,7 +158,7 @@ def client_from_env():
     return AppStoreConnectApiClient(
         os.environ["APP_STORE_CONNECT_KEY_IDENTIFIER"],
         os.environ["APP_STORE_CONNECT_ISSUER_ID"],
-        os.environ["APP_STORE_CONNECT_PRIVATE_KEY"],
+        api_private_key(),
     )
 
 
@@ -191,6 +248,14 @@ def delete_app_store_profiles(client, bundle_id):
 
 
 def main():
+    if "--write-api-key" in sys.argv:
+        index = sys.argv.index("--write-api-key")
+        destination = sys.argv[index + 1]
+        pem = api_private_key()
+        with open(destination, "w", encoding="utf-8") as handle:
+            handle.write(pem)
+        print("normalized App Store Connect API key")
+        return
     client = client_from_env()
     bundle_ids = [exact_bundle_id(client, APP_ID), exact_bundle_id(client, TUNNEL_ID)]
     for bundle_id in bundle_ids:

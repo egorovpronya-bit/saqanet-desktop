@@ -40,6 +40,9 @@ workflows:
             exit 1
           fi
           keychain initialize
+          python3 ios/ci_capabilities.py --write-api-key /tmp/asc_api_key.p8
+          export APP_STORE_CONNECT_PRIVATE_KEY="$(cat /tmp/asc_api_key.p8)"
+          rm -f /tmp/asc_api_key.p8
           python3 ios/ci_capabilities.py
           app-store-connect fetch-signing-files "ru.saqanet.vpn" \
             --type IOS_APP_STORE \
