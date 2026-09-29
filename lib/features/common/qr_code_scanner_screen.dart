@@ -1,4 +1,6 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -399,18 +401,31 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 //   }
 // }
 
-class QrCodeScannerDialog extends ConsumerWidget {
+class QrCodeScannerDialog extends HookConsumerWidget {
   const QrCodeScannerDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.read(translationsProvider).requireValue;
+    final controller = useMemoized(MobileScannerController.new);
+    useEffect(() => controller.dispose, const []);
+
+    Future<void> pickFromGallery() async {
+      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+      final path = result?.files.single.path;
+      if (path == null) return;
+      final capture = await controller.analyzeImage(path);
+      final rawData = capture?.barcodes.firstOrNull?.rawValue;
+      if (rawData != null && context.mounted) context.pop(rawData);
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
           alignment: Alignment.center,
           children: [
             MobileScanner(
+              controller: controller,
               placeholderBuilder: (context) => const Center(child: CircularProgressIndicator()),
               overlayBuilder: (context, constraints) => Container(
                 width: MediaQuery.of(context).size.width * 0.7,
@@ -448,6 +463,21 @@ class QrCodeScannerDialog extends ConsumerWidget {
                 child: IconButton(
                   onPressed: () => context.pop(),
                   icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimaryContainer),
+                  splashRadius: 24,
+                ),
+              ),
+            ),
+            Align(
+              alignment: AlignmentDirectional.topEnd,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(1000),
+                ),
+                margin: const EdgeInsets.all(8),
+                child: IconButton(
+                  onPressed: pickFromGallery,
+                  icon: Icon(Icons.photo_library_outlined, color: Theme.of(context).colorScheme.onPrimaryContainer),
                   splashRadius: 24,
                 ),
               ),
