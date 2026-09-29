@@ -47,7 +47,6 @@ class HiddifyCoreService with InfraLogger {
     await setup()
         .mapLeft((e) {
           loggy.error(e);
-          if (PlatformUtils.isIOS) return;
           statusController.add(const CoreStatus.stopped());
           ref.read(inAppNotificationControllerProvider).showErrorToast(e);
         })
@@ -70,7 +69,10 @@ class HiddifyCoreService with InfraLogger {
         final response = await core.fgClient.parse(ParseRequest(tempPath: tempPath, configPath: path, debug: false));
         if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");
       } catch (e) {
-        await setup().run();
+        final retrySetup = await setup().run();
+        if (retrySetup.isLeft()) {
+          return left(retrySetup.getLeft().toNullable() ?? e.toString());
+        }
         try {
           final response = await core.fgClient.parse(ParseRequest(tempPath: tempPath, configPath: path, debug: false));
           if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");
@@ -89,7 +91,10 @@ class HiddifyCoreService with InfraLogger {
         if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");
         return right(response.content);
       } catch (e) {
-        await setup().run();
+        final retrySetup = await setup().run();
+        if (retrySetup.isLeft()) {
+          return left(retrySetup.getLeft().toNullable() ?? e.toString());
+        }
         try {
           final response = await core.fgClient.parse(ParseRequest(configPath: path, debug: false));
           if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");

@@ -66,7 +66,7 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
         "mode": mode,
         "debug": debug,
       });
-      final res = await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 4));
+      final res = await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 10));
       loggy.info(res.toString());
     }
 
