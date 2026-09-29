@@ -136,14 +136,29 @@ class HiddifyCoreService with InfraLogger {
     return TaskEither(() async {
       loggy.debug("changing options");
       // latestOptions = options;
+      final request = ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson()));
       try {
-        final res = await core.fgClient.changeHiddifySettings(
-          ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
-        );
+        final res = await core.fgClient.changeHiddifySettings(request);
         if (res.messageType != MessageType.EMPTY) return left("${res.messageType} ${res.message}");
-        await core.bgClient.changeHiddifySettings(
-          ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
-        );
+      } catch (e) {
+        if (e is GrpcError && e.code == StatusCode.unavailable) {
+          loggy.debug("foreground core is not started yet! $e");
+        } else {
+          final retrySetup = await setup().run();
+          if (retrySetup.isLeft()) {
+            return left(retrySetup.getLeft().toNullable() ?? e.toString());
+          }
+          try {
+            final res = await core.fgClient.changeHiddifySettings(request);
+            if (res.messageType != MessageType.EMPTY) return left("${res.messageType} ${res.message}");
+          } catch (e2) {
+            return left(e2.toString());
+          }
+        }
+      }
+
+      try {
+        await core.bgClient.changeHiddifySettings(request);
       } on GrpcError catch (e) {
         if (e.code == StatusCode.unavailable) {
           loggy.debug("background core is not started yet! $e");
