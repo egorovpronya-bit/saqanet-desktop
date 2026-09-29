@@ -135,6 +135,7 @@ dev_dependencies:
   slang_build_runner: ^4.4.0
   flutter_gen_runner: ^5.4.0
   dart_mappable_builder: ^4.2.1
+  flutter_launcher_icons: ^0.14.4
   # protoc_builder: ^0.4.1
   # google_protobuf: ^3.20.1;
 
@@ -181,6 +182,13 @@ flutter_native_splash:
   android_12:
     color: "#0A0A12"
     image: assets/images/source/ic_launcher_foreground.png
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/source/ic_launcher_foreground.png"
+  adaptive_icon_background: "#0A0A12"
+  adaptive_icon_foreground: "assets/images/source/ic_launcher_foreground.png"
 
 ffigen:
   name: "HiddifyCoreNativeLibrary"
