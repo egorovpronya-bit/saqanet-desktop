@@ -229,8 +229,8 @@ class _ConnectionButton extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [BoxShadow(blurRadius: 16, color: buttonColor.withValues(alpha: .5))],
             ),
-            width: 148,
-            height: 148,
+            width: 192,
+            height: 192,
             child: Material(
               key: const ValueKey("home_connection_button"),
               shape: const CircleBorder(),
@@ -239,15 +239,15 @@ class _ConnectionButton extends StatelessWidget {
                 focusColor: Colors.grey,
                 onTap: onTap,
                 child: Padding(
-                  padding: const EdgeInsets.all(36),
+                  padding: const EdgeInsets.all(24),
                   child: TweenAnimationBuilder(
                     tween: ColorTween(end: buttonColor),
                     duration: const Duration(milliseconds: 250),
                     builder: (context, value, child) {
                       if (useImage) {
-                        return image.image();
+                        return ClipOval(child: image.image(fit: BoxFit.cover));
                       } else {
-                        return Image.asset('assets/images/sn_logo.png');
+                        return ClipOval(child: Image.asset('assets/images/sn_logo.png', fit: BoxFit.cover));
                       }
                     },
                   ),

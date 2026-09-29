@@ -88,7 +88,7 @@ class AboutPage extends HookConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/sn_logo.png', width: 64, height: 64),
+                  ClipOval(child: Image.asset('assets/images/sn_logo.png', width: 64, height: 64, fit: BoxFit.cover)),
                   const Gap(16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

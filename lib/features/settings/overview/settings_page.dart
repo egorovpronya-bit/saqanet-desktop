@@ -189,11 +189,13 @@ class SettingsPage extends HookConsumerWidget {
               title: t.pages.logs.title,
               icon: Icons.description_rounded,
               namedLocation: context.namedLocation('logs'),
+              push: true,
             ),
             SettingsSection(
               title: t.pages.about.title,
               icon: Icons.info_rounded,
               namedLocation: context.namedLocation('about'),
+              push: true,
             ),
           ],
         ],
@@ -209,12 +211,14 @@ class SettingsSection extends HookConsumerWidget {
     required this.icon,
     this.subtitle,
     required this.namedLocation,
+    this.push = false,
   });
 
   final String title;
   final Widget? subtitle;
   final IconData icon;
   final String namedLocation;
+  final bool push;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -223,7 +227,7 @@ class SettingsSection extends HookConsumerWidget {
       title: Text(title),
       subtitle: subtitle,
       trailing: const Icon(Icons.chevron_right_rounded),
-      onTap: () => context.go(namedLocation),
+      onTap: () => push ? context.push(namedLocation) : context.go(namedLocation),
     );
   }
 }

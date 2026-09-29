@@ -11,6 +11,8 @@ abstract class Constants {
   // Хостим на нашем VPS — Hiddify не имеет контроля над обновлениями
   static const appCastUrl = "https://saqanet.ru/appcast.xml";
   static const telegramChannelUrl = "https://t.me/SAQANet_bot";
+  static const telegramBotDeepLink = "tg://resolve?domain=SAQANet_bot";
+  static const tariffsBuyUrlBase = "https://nl2.saqanet.ru/buy?plan=";
   static const privacyPolicyUrl = "https://saqanet.ru/privacy";
   static const termsAndConditionsUrl = "https://saqanet.ru/terms";
   static const cfWarpPrivacyPolicy = "https://www.cloudflare.com/application/privacypolicy/";
