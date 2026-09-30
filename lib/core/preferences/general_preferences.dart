@@ -116,6 +116,10 @@ abstract class Preferences {
   static final psiphonConsentGiven = PreferencesNotifier.create<bool, bool>("psiphon-consent-given", false);
 
   static final showRouteGeneralOptions = PreferencesNotifier.create<bool, bool>("show-route-general-options", true);
+
+  static final confirmRemoveProfile = PreferencesNotifier.create<bool, bool>("confirm_remove_profile", true);
+
+  static final autoConnectOnStart = PreferencesNotifier.create<bool, bool>("auto_connect_on_start", false);
 }
 
 @Riverpod(keepAlive: true)

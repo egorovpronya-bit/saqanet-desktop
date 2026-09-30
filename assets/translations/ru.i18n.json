@@ -238,7 +238,10 @@
         "urlTestInterval": "Интервал теста URL",
         "clashApiPort": "Порт Clash API",
         "useXrayCoreWhenPossible": "Использовать xray-core, если возможно",
-        "useXrayCoreWhenPossibleMsg": "Использовать xray-core при обработке ссылок на подписку. Необходимо повторно импортировать ссылку, чтобы включить эту опцию."
+        "useXrayCoreWhenPossibleMsg": "Использовать xray-core при обработке ссылок на подписку. Необходимо повторно импортировать ссылку, чтобы включить эту опцию.",
+        "confirmRemoveProfile": "Подтверждать удаление профиля",
+        "autoConnectOnStart": "Автоподключение при запуске",
+        "autoConnectOnStartMsg": "Автоматически подключаться к выбранному серверу при запуске приложения (может оказаться неудачным)"
       },
       "routing": {
         "title": "Маршрутизация",

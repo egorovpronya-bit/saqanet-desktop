@@ -8,6 +8,7 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/notification/in_app_notification_controller.dart';
+import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
@@ -296,16 +297,18 @@ class ProfileActionsMenu extends HookConsumerWidget {
       AdaptiveMenuItem(
         leadingIcon: const Icon(Icons.delete_outline_rounded),
         title: t.common.delete,
-        onTap: () async => await ref
-            .read(dialogNotifierProvider.notifier)
-            .showConfirmation(
-              title: t.dialogs.confirmation.profile.delete.title,
-              message: t.dialogs.confirmation.profile.delete.msg,
-            )
-            .then((deleteConfirmed) async {
-              if (!deleteConfirmed) return;
-              await ref.read(profilesNotifierProvider.notifier).deleteProfile(profile);
-            }),
+        onTap: () async {
+          final deleteConfirmed =
+              !ref.read(Preferences.confirmRemoveProfile) ||
+              await ref
+                  .read(dialogNotifierProvider.notifier)
+                  .showConfirmation(
+                    title: t.dialogs.confirmation.profile.delete.title,
+                    message: t.dialogs.confirmation.profile.delete.msg,
+                  );
+          if (!deleteConfirmed) return;
+          await ref.read(profilesNotifierProvider.notifier).deleteProfile(profile);
+        },
       ),
     ];
 

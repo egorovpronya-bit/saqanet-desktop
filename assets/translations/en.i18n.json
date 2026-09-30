@@ -234,7 +234,10 @@
         "urlTestInterval": "URL test interval",
         "clashApiPort": "Clash API port",
         "useXrayCoreWhenPossible": "Use xray-core when possible",
-        "useXrayCoreWhenPossibleMsg": "Use xray-core during parsing sub links. You need to reimport the sub link to enable this option."
+        "useXrayCoreWhenPossibleMsg": "Use xray-core during parsing sub links. You need to reimport the sub link to enable this option.",
+        "confirmRemoveProfile": "Confirm profile deletion",
+        "autoConnectOnStart": "Auto-connect on start",
+        "autoConnectOnStartMsg": "Automatically connect to the selected server on app launch (may not always work)"
       },
       "routing": {
         "title": "Routing",
