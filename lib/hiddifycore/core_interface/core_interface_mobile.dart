@@ -69,17 +69,10 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
       });
       final invokeMs = sw.elapsedMilliseconds;
       try {
-        // was 10s; native Go core cold-start on real hardware can take longer
-        // than on simulator/Android, so we wait longer and record real timing
-        // via Sentry to find out how long it actually needs.
         final res = await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 30));
         loggy.info(res.toString());
-        unawaited(
-          Sentry.captureMessage(
-            "ios core setup: sayHello ok (invoke=${invokeMs}ms, total=${sw.elapsedMilliseconds}ms)",
-          ),
-        );
       } catch (e, st) {
+        final portOpen = await isPortOpen('127.0.0.1', portFront);
         unawaited(
           Sentry.captureException(
             e,
@@ -87,10 +80,14 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
             withScope: (scope) => scope.setContexts("ios_core_setup", {
               "invokeMs": invokeMs,
               "totalMs": sw.elapsedMilliseconds,
+              "portOpen": portOpen,
             }),
           ),
         );
-        rethrow;
+        // surfaced in the "failed to add profile" dialog so we can see it
+        // from a screenshot without Sentry/Xcode: does the Go gRPC listener
+        // ever bind (portOpen), or does it never come up at all?
+        throw Exception("$e (invokeMs=$invokeMs, frontPortOpen=$portOpen)");
       }
     }
 
