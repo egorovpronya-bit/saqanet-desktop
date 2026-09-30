@@ -247,15 +247,27 @@ Future<bool> waitUntilPort(
 
 Future<String> _fetchGoroutineDump() async {
   final client = HttpClient()..connectionTimeout = const Duration(seconds: 2);
+  // grpc_server.go binds with http.ListenAndServe("localhost:6060", nil), which
+  // resolves "localhost" via DNS and listens on ONE address only - on iOS that
+  // can come back IPv6-first (::1). A client hitting 127.0.0.1 explicitly then
+  // gets a real "connection refused" even though the server is up. Try every
+  // loopback form so a family mismatch doesn't look like "server never started".
+  const hosts = ['127.0.0.1', '::1', 'localhost'];
+  final errors = <String>[];
   try {
-    final request = await client
-        .getUrl(Uri.parse('http://127.0.0.1:6060/debug/pprof/goroutine?debug=1'))
-        .timeout(const Duration(seconds: 3));
-    final response = await request.close().timeout(const Duration(seconds: 3));
-    final body = await response.transform(utf8.decoder).join().timeout(const Duration(seconds: 3));
-    return body.length > 2500 ? "${body.substring(0, 2500)}\n...(truncated, ${body.length}b total)" : body;
-  } catch (e) {
-    return "(failed to fetch goroutine dump: $e)";
+    for (final host in hosts) {
+      try {
+        final request = await client
+            .getUrl(Uri.parse('http://$host:6060/debug/pprof/goroutine?debug=1'))
+            .timeout(const Duration(seconds: 3));
+        final response = await request.close().timeout(const Duration(seconds: 3));
+        final body = await response.transform(utf8.decoder).join().timeout(const Duration(seconds: 3));
+        return body.length > 2500 ? "${body.substring(0, 2500)}\n...(truncated, ${body.length}b total)" : body;
+      } catch (e) {
+        errors.add('$host: $e');
+      }
+    }
+    return "(failed to fetch goroutine dump: ${errors.join(' | ')})";
   } finally {
     client.close(force: true);
   }
