@@ -403,6 +403,7 @@ class HiddifyCoreService with InfraLogger {
   Stream<List<LogMessage>> watchLogs(String path) async* {
     if (!core.isInitialized()) {
       loggy.debug("core is not initialized, returning empty log stream");
+      yield [];
       return;
     }
     await startListeningLogs("bg", core.bgClient);
