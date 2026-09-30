@@ -16,6 +16,7 @@ import 'package:hiddify/singbox/model/core_status.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:loggy/loggy.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 final _logger = Loggy('FFIHiddifyCoreService');
 
@@ -57,7 +58,7 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
       loggy.info("core is already started!");
     } catch (e) {
       //core is not started yet
-
+      final sw = Stopwatch()..start();
       await methodChannel.invokeMethod("setup", {
         "baseDir": directories.baseDir.path,
         "workingDir": directories.workingDir.path,
@@ -66,8 +67,31 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
         "mode": mode,
         "debug": debug,
       });
-      final res = await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 10));
-      loggy.info(res.toString());
+      final invokeMs = sw.elapsedMilliseconds;
+      try {
+        // was 10s; native Go core cold-start on real hardware can take longer
+        // than on simulator/Android, so we wait longer and record real timing
+        // via Sentry to find out how long it actually needs.
+        final res = await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 30));
+        loggy.info(res.toString());
+        unawaited(
+          Sentry.captureMessage(
+            "ios core setup: sayHello ok (invoke=${invokeMs}ms, total=${sw.elapsedMilliseconds}ms)",
+          ),
+        );
+      } catch (e, st) {
+        unawaited(
+          Sentry.captureException(
+            e,
+            stackTrace: st,
+            withScope: (scope) => scope.setContexts("ios_core_setup", {
+              "invokeMs": invokeMs,
+              "totalMs": sw.elapsedMilliseconds,
+            }),
+          ),
+        );
+        rethrow;
+      }
     }
 
     // serverPublicKey = await methodChannel.invokeMethod<Uint8List>("get_grpc_server_public_key") ?? Uint8List.fromList([]);
