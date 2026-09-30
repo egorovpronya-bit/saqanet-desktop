@@ -68,8 +68,19 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
         "debug": debug,
       });
       final invokeMs = sw.elapsedMilliseconds;
+      // the first sayHello above already failed once (core wasn't up yet),
+      // which can leave that ClientChannel in gRPC reconnect-backoff even
+      // though the port is open now - use a fresh channel for the retry
+      // instead of reusing the one that already failed.
+      final retryHelloClient = HelloClient(
+        ClientChannel(
+          '127.0.0.1',
+          port: portFront,
+          options: ChannelOptions(credentials: channelOption),
+        ),
+      );
       try {
-        final res = await helloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 30));
+        final res = await retryHelloClient.sayHello(HelloRequest(name: "test")).timeout(const Duration(seconds: 30));
         loggy.info(res.toString());
       } catch (e, st) {
         final portOpen = await isPortOpen('127.0.0.1', portFront);
