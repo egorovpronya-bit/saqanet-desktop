@@ -252,7 +252,7 @@ Future<String> _fetchGoroutineDump() async {
   // can come back IPv6-first (::1). A client hitting 127.0.0.1 explicitly then
   // gets a real "connection refused" even though the server is up. Try every
   // loopback form so a family mismatch doesn't look like "server never started".
-  const hosts = ['127.0.0.1', '::1', 'localhost'];
+  const hosts = ['127.0.0.1', '[::1]', 'localhost'];
   final errors = <String>[];
   try {
     for (final host in hosts) {
