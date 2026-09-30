@@ -78,6 +78,10 @@ public class MethodHandler: NSObject, FlutterPlugin {
                     VPNConfig.shared.tempDir=tempDir
                     let debug = (args["debug"] as? NSNumber)?.boolValue ?? false
                     var error: NSError?
+                    // belt-and-suspenders: make sure this is set right before the
+                    // first Go call too, in case it ever runs without AppDelegate's
+                    // didFinishLaunchingWithOptions having fired first (see AppDelegate.swift)
+                    setenv("GOMAXPROCS", "16", 1)
                     let setupOK = MobileSetup(
                         baseDir,
                         workingDir,

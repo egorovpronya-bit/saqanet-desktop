@@ -9,6 +9,14 @@ import Sentry
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        // On real iOS devices (few CPU cores), goroutines inside Libcore that make
+        // blocking native calls can exhaust GOMAXPROCS OS threads, starving the
+        // goroutine that Serve()s the gRPC listener - it never gets scheduled, so
+        // sayHello() times out even though the port is open. Simulators/Macs have
+        // enough cores that this doesn't surface. Go's runtime reads GOMAXPROCS
+        // from the environment at startup, so raise it before any Go code runs.
+        // See: https://github.com/golang/go/issues/65603
+        setenv("GOMAXPROCS", "16", 1)
         setupFileManager()
         registerHandlers()
         GeneratedPluginRegistrant.register(with: self)
