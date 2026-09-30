@@ -1,7 +1,7 @@
 ﻿name: hiddify
 description: SAQANet - Secure Private VPN for Everyone.
 publish_to: "none"
-version: 4.1.2+40112
+version: 4.1.2+40113
 
 environment:
   sdk: ^3.10.4
