@@ -82,6 +82,12 @@ public class MethodHandler: NSObject, FlutterPlugin {
                     // first Go call too, in case it ever runs without AppDelegate's
                     // didFinishLaunchingWithOptions having fired first (see AppDelegate.swift)
                     setenv("GOMAXPROCS", "16", 1)
+                    // hcore's Setup() calls hutils.RedirectStderr(workingDir+"/data/stderrN.log")
+                    // but never creates "data/" first and silently ignores the error if that
+                    // open() fails - on a fresh install the dir doesn't exist yet, so the redirect
+                    // is a silent no-op and Go's stderr (panics, log.Fatal) goes nowhere we can
+                    // read. Create it here so the redirect actually lands.
+                    try? FileManager.default.createDirectory(atPath: "\(workingDir)/data", withIntermediateDirectories: true)
                     let setupOK = MobileSetup(
                         baseDir,
                         workingDir,
