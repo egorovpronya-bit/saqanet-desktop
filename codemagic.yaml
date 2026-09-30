@@ -21,12 +21,20 @@ workflows:
           flutter pub get
           dart run slang
           dart run build_runner build --delete-conflicting-outputs --low-resources-mode
-      - name: Unpack iOS core
+      - name: Build iOS core from source
         script: |
-          cd ios/Frameworks
-          unzip -o Libcore.xcframework.zip
-          rm -rf HiddifyCore.xcframework
-          mv Libcore.xcframework HiddifyCore.xcframework
+          set -euo pipefail
+          # ray2sing is a nested submodule pinned via an SSH URL (git@github.com:...);
+          # it's public, so rewrite SSH to HTTPS to avoid needing a deploy key in CI.
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          cd hiddify-core
+          git submodule update --init --recursive
+          brew install go
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          make ios
+          cd ..
+          rm -rf ios/Frameworks/HiddifyCore.xcframework
+          cp -r hiddify-core/bin/HiddifyCore.xcframework ios/Frameworks/HiddifyCore.xcframework
       - name: CocoaPods
         script: |
           cd ios
