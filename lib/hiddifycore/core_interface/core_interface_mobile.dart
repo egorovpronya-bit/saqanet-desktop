@@ -84,6 +84,12 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
         loggy.info(res.toString());
       } catch (e, st) {
         final portOpen = await isPortOpen('127.0.0.1', portFront);
+        // hcore's Setup() redirects the Go process's raw stderr fd to this
+        // file (hutils.RedirectStderr in grpc_server.go) - it's a plain
+        // sandbox file, not routed through os_log, so it isn't subject to
+        // iOS's "<private>" redaction of app log content. Any panic/fatal
+        // from inside the gRPC Serve() goroutine lands here.
+        final stderrLog = await _readCoreStderrLog(directories.workingDir.path);
         unawaited(
           Sentry.captureException(
             e,
@@ -92,13 +98,15 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
               "invokeMs": invokeMs,
               "totalMs": sw.elapsedMilliseconds,
               "portOpen": portOpen,
+              "stderrLog": stderrLog,
             }),
           ),
         );
         // surfaced in the "failed to add profile" dialog so we can see it
         // from a screenshot without Sentry/Xcode: does the Go gRPC listener
-        // ever bind (portOpen), or does it never come up at all?
-        throw Exception("$e (invokeMs=$invokeMs, frontPortOpen=$portOpen)");
+        // ever bind (portOpen), or does it never come up at all, and what
+        // (if anything) did the Go core write to stderr while hanging?
+        throw Exception("$e (invokeMs=$invokeMs, frontPortOpen=$portOpen)\nstderr: $stderrLog");
       }
     }
 
@@ -231,6 +239,29 @@ Future<bool> waitUntilPort(
     await Future.delayed(const Duration(milliseconds: 200));
   }
   return false;
+}
+
+Future<String> _readCoreStderrLog(String workingDir) async {
+  try {
+    final dir = Directory('$workingDir/data');
+    if (!await dir.exists()) return "(no data dir)";
+    final logFiles = await dir
+        .list()
+        .where((entry) => entry is File && entry.path.split(Platform.pathSeparator).last.startsWith('stderr'))
+        .cast<File>()
+        .toList();
+    if (logFiles.isEmpty) return "(no stderr log files)";
+    final buf = StringBuffer();
+    for (final file in logFiles) {
+      final content = await file.readAsString();
+      final tail = content.length > 1500 ? content.substring(content.length - 1500) : content;
+      buf.writeln("--- ${file.path.split(Platform.pathSeparator).last} (${content.length}b) ---");
+      buf.writeln(tail);
+    }
+    return buf.toString();
+  } catch (e) {
+    return "(failed to read stderr log: $e)";
+  }
 }
 
 Future<bool> isPortOpen(String host, int port, {Duration timeout = const Duration(milliseconds: 300)}) async {
