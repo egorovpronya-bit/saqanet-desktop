@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:basic_utils/basic_utils.dart';
@@ -65,7 +66,11 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
         "tempDir": directories.tempDir.path,
         "grpcPort": portFront,
         "mode": mode,
-        "debug": debug,
+        // forced true (diagnostic): params.Debug also gates hcore's
+        // net/http/pprof server on localhost:6060 (grpc_server.go), which
+        // is the only way to see what a hung (non-crashing) goroutine is
+        // blocked on - see _fetchGoroutineDump below.
+        "debug": true,
       });
       final invokeMs = sw.elapsedMilliseconds;
       // the first sayHello above already failed once (core wasn't up yet),
@@ -84,12 +89,13 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
         loggy.info(res.toString());
       } catch (e, st) {
         final portOpen = await isPortOpen('127.0.0.1', portFront);
-        // hcore's Setup() redirects the Go process's raw stderr fd to this
-        // file (hutils.RedirectStderr in grpc_server.go) - it's a plain
-        // sandbox file, not routed through os_log, so it isn't subject to
-        // iOS's "<private>" redaction of app log content. Any panic/fatal
-        // from inside the gRPC Serve() goroutine lands here.
-        final stderrLog = await _readCoreStderrLog(directories.workingDir.path);
+        // hcore's Setup() starts a net/http/pprof server on :6060 when
+        // Debug=true (forced above). /debug/pprof/goroutine?debug=1 dumps
+        // every live goroutine's stack, grouped by identical trace - this
+        // is a hang (no crash), so it's the only channel that can show
+        // what's actually blocked; a crash-only log (debug.SetCrashOutput)
+        // would stay empty even if it worked.
+        final goroutineDump = await _fetchGoroutineDump();
         unawaited(
           Sentry.captureException(
             e,
@@ -98,15 +104,13 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
               "invokeMs": invokeMs,
               "totalMs": sw.elapsedMilliseconds,
               "portOpen": portOpen,
-              "stderrLog": stderrLog,
+              "goroutineDump": goroutineDump,
             }),
           ),
         );
         // surfaced in the "failed to add profile" dialog so we can see it
-        // from a screenshot without Sentry/Xcode: does the Go gRPC listener
-        // ever bind (portOpen), or does it never come up at all, and what
-        // (if anything) did the Go core write to stderr while hanging?
-        throw Exception("$e (invokeMs=$invokeMs, frontPortOpen=$portOpen)\nstderr: $stderrLog");
+        // from a screenshot without Sentry/Xcode.
+        throw Exception("$e (invokeMs=$invokeMs, frontPortOpen=$portOpen)\n$goroutineDump");
       }
     }
 
@@ -241,26 +245,19 @@ Future<bool> waitUntilPort(
   return false;
 }
 
-Future<String> _readCoreStderrLog(String workingDir) async {
+Future<String> _fetchGoroutineDump() async {
+  final client = HttpClient()..connectionTimeout = const Duration(seconds: 2);
   try {
-    final dir = Directory('$workingDir/data');
-    if (!await dir.exists()) return "(no data dir)";
-    final logFiles = await dir
-        .list()
-        .where((entry) => entry is File && entry.path.split(Platform.pathSeparator).last.startsWith('stderr'))
-        .cast<File>()
-        .toList();
-    if (logFiles.isEmpty) return "(no stderr log files)";
-    final buf = StringBuffer();
-    for (final file in logFiles) {
-      final content = await file.readAsString();
-      final tail = content.length > 1500 ? content.substring(content.length - 1500) : content;
-      buf.writeln("--- ${file.path.split(Platform.pathSeparator).last} (${content.length}b) ---");
-      buf.writeln(tail);
-    }
-    return buf.toString();
+    final request = await client
+        .getUrl(Uri.parse('http://127.0.0.1:6060/debug/pprof/goroutine?debug=1'))
+        .timeout(const Duration(seconds: 3));
+    final response = await request.close().timeout(const Duration(seconds: 3));
+    final body = await response.transform(utf8.decoder).join().timeout(const Duration(seconds: 3));
+    return body.length > 2500 ? "${body.substring(0, 2500)}\n...(truncated, ${body.length}b total)" : body;
   } catch (e) {
-    return "(failed to read stderr log: $e)";
+    return "(failed to fetch goroutine dump: $e)";
+  } finally {
+    client.close(force: true);
   }
 }
 
