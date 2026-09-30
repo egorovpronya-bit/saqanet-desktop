@@ -58,6 +58,12 @@ class SettingsPage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.pages.settings.title),
+        leading: Breakpoint(context).isMobile()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => context.goNamed('home'),
+              )
+            : null,
         actions: [
           MenuAnchor(
             menuChildren: <Widget>[
