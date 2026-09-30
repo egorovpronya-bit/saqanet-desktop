@@ -31,10 +31,19 @@ workflows:
           git submodule update --init --recursive
           brew install go
           export PATH="$(go env GOPATH)/bin:$PATH"
-          make ios
+          # `make ios` builds bin/HiddifyCore.xcframework, but gomobile bind bakes
+          # the Swift module name from the -o basename, so that comes out named
+          # "HiddifyCore" - not "Libcore", the module every Swift file in ios/
+          # imports (see ios/Local Packages/Package.swift's Libcore binaryTarget).
+          # The old prebuilt-pin workflow built straight to Libcore.xcframework and
+          # only renamed the outer folder afterwards; do the same here by rewriting
+          # make's -o path before running it, so gomobile names the module right
+          # from the start instead of us hand-patching the compiled framework.
+          make -n ios | sed 's#bin/HiddifyCore\.xcframework#bin/Libcore.xcframework#g' > /tmp/build_ios_core.sh
+          bash /tmp/build_ios_core.sh
           cd ..
           rm -rf ios/Frameworks/HiddifyCore.xcframework
-          cp -r hiddify-core/bin/HiddifyCore.xcframework ios/Frameworks/HiddifyCore.xcframework
+          cp -r hiddify-core/bin/Libcore.xcframework ios/Frameworks/HiddifyCore.xcframework
       - name: CocoaPods
         script: |
           cd ios
