@@ -125,3 +125,71 @@ workflows:
         auth: integration
         submit_to_testflight: true
         submit_to_app_store: false
+
+  ios-sim-debug:
+    name: iOS Simulator crash capture (diagnostic)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: 3.38.5
+      xcode: latest
+      cocoapods: default
+      vars:
+        CM_RECURSIVE_SUBMODULE_INIT: "false"
+    scripts:
+      - name: Flutter packages and codegen
+        script: |
+          flutter pub get
+          dart run slang
+          dart run build_runner build --delete-conflicting-outputs --low-resources-mode
+      - name: Build iOS core from source (device + simulator slices)
+        script: |
+          set -euo pipefail
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          cd hiddify-core
+          git submodule update --init --recursive
+          brew install go
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          make lib_install
+          gomobile bind -v -target ios,iossimulator -libname=hiddify-core \
+            -tags=with_gvisor,with_quic,with_wireguard,with_utls,with_clash_api,with_grpc,with_awg,tfogo_checklinkname0,with_naive_outbound,with_conntrack,with_dhcp,with_low_memory,with_purego \
+            -trimpath -ldflags="-w -s -checklinkname=0 -buildid= ${CODE_VERSION:-}" \
+            -o bin/Libcore.xcframework \
+            github.com/sagernet/sing-box/experimental/libbox ./platform/mobile
+          cd ..
+          rm -rf ios/Frameworks/HiddifyCore.xcframework
+          cp -r hiddify-core/bin/Libcore.xcframework ios/Frameworks/HiddifyCore.xcframework
+      - name: CocoaPods
+        script: |
+          cd ios
+          rm -f Podfile.lock
+          pod install --repo-update
+      - name: Build for Simulator and launch with console capture
+        script: |
+          set -euo pipefail
+          flutter build ios --simulator --debug --no-codesign
+
+          RUNTIME=$(xcrun simctl list runtimes | grep -i iOS | tail -1 | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.iOS[0-9A-Za-z-]+')
+          DEVICETYPE=$(xcrun simctl list devicetypes | grep "iPhone 15 " | head -1 | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9-]+')
+          echo "Runtime: $RUNTIME, DeviceType: $DEVICETYPE"
+          SIMID=$(xcrun simctl create SaqanetDebug "$DEVICETYPE" "$RUNTIME")
+          echo "Simulator: $SIMID"
+          xcrun simctl boot "$SIMID"
+          xcrun simctl bootstatus "$SIMID" -b
+
+          APP_PATH=$(find build/ios/iphonesimulator -maxdepth 1 -name "*.app" | head -1)
+          echo "App: $APP_PATH"
+          BUNDLE_ID=$(plutil -extract CFBundleIdentifier raw "$APP_PATH/Info.plist")
+          echo "Bundle ID: $BUNDLE_ID"
+
+          xcrun simctl install "$SIMID" "$APP_PATH"
+
+          echo "=== Launching with console capture (up to 45s) ==="
+          (xcrun simctl launch --console-pty "$SIMID" "$BUNDLE_ID" 2>&1 &
+           LAUNCH_PID=$!
+           sleep 45
+           kill "$LAUNCH_PID" 2>/dev/null || true
+           wait "$LAUNCH_PID" 2>/dev/null || true)
+
+          echo "=== Simulator crash reports (DiagnosticReports) ==="
+          find "$HOME/Library/Logs/DiagnosticReports" -iname "*${BUNDLE_ID##*.}*" -newer "$APP_PATH/Info.plist" 2>/dev/null -exec echo "--- {} ---" \; -exec cat {} \; || echo "none found"
