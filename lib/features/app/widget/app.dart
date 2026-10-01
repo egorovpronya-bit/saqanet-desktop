@@ -81,7 +81,7 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
               builder: (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) {
                 return MaterialApp.router(
                   routerConfig: router,
-                  locale: locale.flutterLocale,
+                  locale: locale.flutterSupportedLocale,
                   supportedLocales: AppLocaleUtils.supportedLocales,
                   localizationsDelegates: GlobalMaterialLocalizations.delegates,
                   debugShowCheckedModeBanner: false,
