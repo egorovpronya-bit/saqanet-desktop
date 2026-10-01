@@ -29,7 +29,19 @@ workflows:
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           cd hiddify-core
           git submodule update --init --recursive
-          brew install go
+          # brew install go always grabs the latest Homebrew formula, which can be
+          # newer than go.mod's `go 1.25.6` line (a floor, not a pin). A newer Go
+          # adds fields to crypto/tls.ConnectionState, which breaks the unsafe
+          # struct-layout cast in hiddify-sing-box/replace/psiphon-tls/unsafe.go
+          # ("struct field count mismatch") - that panics in an init() before any
+          # app code runs, surfacing on-device as a bare Go-runtime SIGABRT.
+          # Install the exact pinned toolchain instead.
+          GOVERSION=1.25.6
+          curl -fsSL "https://go.dev/dl/go${GOVERSION}.darwin-arm64.tar.gz" -o /tmp/go.tar.gz
+          rm -rf /tmp/goroot && mkdir -p /tmp/goroot
+          tar -C /tmp/goroot -xzf /tmp/go.tar.gz --strip-components=1
+          export PATH="/tmp/goroot/bin:$PATH"
+          go version
           export PATH="$(go env GOPATH)/bin:$PATH"
           # `make ios` builds bin/HiddifyCore.xcframework, but gomobile bind bakes
           # the Swift module name from the -o basename (see cmd/gomobile/bind_iosapp.go:
@@ -148,7 +160,12 @@ workflows:
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           cd hiddify-core
           git submodule update --init --recursive
-          brew install go
+          GOVERSION=1.25.6
+          curl -fsSL "https://go.dev/dl/go${GOVERSION}.darwin-arm64.tar.gz" -o /tmp/go.tar.gz
+          rm -rf /tmp/goroot && mkdir -p /tmp/goroot
+          tar -C /tmp/goroot -xzf /tmp/go.tar.gz --strip-components=1
+          export PATH="/tmp/goroot/bin:$PATH"
+          go version
           export PATH="$(go env GOPATH)/bin:$PATH"
           make lib_install
           gomobile bind -v -target ios,iossimulator -libname=hiddify-core \
