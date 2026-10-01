@@ -399,6 +399,10 @@
           "bypassLan": {
             "name": "Bypass LAN",
             "description": ""
+          },
+          "ruServices": {
+            "name": "RU banks & services",
+            "description": "Marketplaces, banks, carriers, maps, video and other Russian services bypass VPN"
           }
         }
       },

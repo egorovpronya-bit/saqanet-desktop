@@ -19,8 +19,8 @@ import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart'
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
-import 'package:hiddify/utils/number_formatters.dart';
 import 'package:hiddify/utils/saqanet_links.dart';
+import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 Future<void> _pickLanguage(WidgetRef ref) async {
@@ -106,16 +106,17 @@ class HomePage extends HookConsumerWidget {
                   context.goNamed('tariffs');
               }
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: _SettingsMenuAction.profiles, child: Text('Профили')),
-              PopupMenuItem(value: _SettingsMenuAction.config, child: Text('Конфигурация')),
-              PopupMenuItem(value: _SettingsMenuAction.apps, child: Text('Приложения')),
-              PopupMenuItem(value: _SettingsMenuAction.language, child: Text('Язык')),
-              PopupMenuItem(value: _SettingsMenuAction.notWorking, child: Text('Не работает?')),
-              PopupMenuItem(value: _SettingsMenuAction.telegram, child: Text('Telegram @SAQANet_bot')),
-              PopupMenuItem(value: _SettingsMenuAction.checkUpdate, child: Text('Проверить обновление')),
-              PopupMenuItem(value: _SettingsMenuAction.about, child: Text('О приложении')),
-              PopupMenuItem(value: _SettingsMenuAction.tariffs, child: Text('Тарифы')),
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: _SettingsMenuAction.profiles, child: Text('Профили')),
+              const PopupMenuItem(value: _SettingsMenuAction.config, child: Text('Конфигурация')),
+              if (PlatformUtils.isAndroid)
+                const PopupMenuItem(value: _SettingsMenuAction.apps, child: Text('Приложения')),
+              const PopupMenuItem(value: _SettingsMenuAction.language, child: Text('Язык')),
+              const PopupMenuItem(value: _SettingsMenuAction.notWorking, child: Text('Не работает?')),
+              const PopupMenuItem(value: _SettingsMenuAction.telegram, child: Text('Telegram @SAQANet_bot')),
+              const PopupMenuItem(value: _SettingsMenuAction.checkUpdate, child: Text('Проверить обновление')),
+              const PopupMenuItem(value: _SettingsMenuAction.about, child: Text('О приложении')),
+              const PopupMenuItem(value: _SettingsMenuAction.tariffs, child: Text('Тарифы')),
             ],
           ),
           Semantics(
