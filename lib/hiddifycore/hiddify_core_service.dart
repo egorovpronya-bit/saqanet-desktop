@@ -39,7 +39,7 @@ class HiddifyCoreService with InfraLogger {
   CoreStatus currentState = const CoreStatus.stopped();
   final statusController = BehaviorSubject<CoreStatus>();
   final logController = BehaviorSubject<List<LogMessage>>();
-  final CallOptions? grpcOptions = null; //CallOptions(timeout: const Duration(milliseconds: 10000));
+  final CallOptions grpcOptions = CallOptions(timeout: const Duration(milliseconds: 10000));
   final Map<String, StreamSubscription?> subscriptions = {};
   List<OutboundGroup> latest = [];
 
@@ -66,7 +66,10 @@ class HiddifyCoreService with InfraLogger {
   TaskEither<String, Unit> validateConfigByPath(String path, String tempPath, bool debug) {
     return TaskEither(() async {
       try {
-        final response = await core.fgClient.parse(ParseRequest(tempPath: tempPath, configPath: path, debug: false));
+        final response = await core.fgClient.parse(
+          ParseRequest(tempPath: tempPath, configPath: path, debug: false),
+          options: grpcOptions,
+        );
         if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");
       } catch (e) {
         final retrySetup = await setup().run();
@@ -74,7 +77,10 @@ class HiddifyCoreService with InfraLogger {
           return left(retrySetup.getLeft().toNullable() ?? e.toString());
         }
         try {
-          final response = await core.fgClient.parse(ParseRequest(tempPath: tempPath, configPath: path, debug: false));
+          final response = await core.fgClient.parse(
+            ParseRequest(tempPath: tempPath, configPath: path, debug: false),
+            options: grpcOptions,
+          );
           if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");
         } catch (e2) {
           return left(e2.toString());
@@ -87,7 +93,10 @@ class HiddifyCoreService with InfraLogger {
   TaskEither<String, String> generateFullConfigByPath(String path) {
     return TaskEither(() async {
       try {
-        final response = await core.fgClient.parse(ParseRequest(configPath: path, debug: false));
+        final response = await core.fgClient.parse(
+          ParseRequest(configPath: path, debug: false),
+          options: grpcOptions,
+        );
         if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");
         return right(response.content);
       } catch (e) {
@@ -96,7 +105,10 @@ class HiddifyCoreService with InfraLogger {
           return left(retrySetup.getLeft().toNullable() ?? e.toString());
         }
         try {
-          final response = await core.fgClient.parse(ParseRequest(configPath: path, debug: false));
+          final response = await core.fgClient.parse(
+            ParseRequest(configPath: path, debug: false),
+            options: grpcOptions,
+          );
           if (response.responseCode != ResponseCode.OK) return left("${response.responseCode} ${response.message}");
           return right(response.content);
         } catch (e2) {
