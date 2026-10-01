@@ -88,14 +88,18 @@ public class MethodHandler: NSObject, FlutterPlugin {
                     // is a silent no-op and Go's stderr (panics, log.Fatal) goes nowhere we can
                     // read. Create it here so the redirect actually lands.
                     try? FileManager.default.createDirectory(atPath: "\(workingDir)/data", withIntermediateDirectories: true)
+                    let setupOptions = MobileSetupOptions()
+                    setupOptions.basePath = baseDir
+                    setupOptions.workingDir = workingDir
+                    setupOptions.tempDir = tempDir
+                    setupOptions.listen = "127.0.0.1:\(grpcPort)"
+                    setupOptions.secret = ""
+                    setupOptions.debug = debug
+                    setupOptions.mode = mode
+                    setupOptions.fixAndroidStack = false
                     let setupOK = MobileSetup(
-                        baseDir,
-                        workingDir,
-                        tempDir,
-                        mode,
-                        "127.0.0.1:\(grpcPort)",
-                        "",
-                        debug,
+                        setupOptions,
+                        nil,
                         &error
                     )
                     

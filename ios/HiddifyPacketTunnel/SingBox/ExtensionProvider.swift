@@ -50,17 +50,21 @@ open class ExtensionProvider: NEPacketTunnelProvider {
             if platformInterface == nil {
                 platformInterface = ExtensionPlatformInterface(self)
             }
-            // Libcore 3.1.8: MobileSetup(base, working, temp, mode, listen, secret, debug, &error)
+            // Libcore 4.1.0: MobileSetup(opt: MobileSetupOptions, platformInterface, &error)
             var setupError: NSError?
             let listen = "127.0.0.1:\(grpcServiceModePort)"
+            let setupOptions = MobileSetupOptions()
+            setupOptions.basePath = sharedDir
+            setupOptions.workingDir = workDir
+            setupOptions.tempDir = cacheDir
+            setupOptions.listen = listen
+            setupOptions.secret = ""
+            setupOptions.debug = false
+            setupOptions.mode = 4
+            setupOptions.fixAndroidStack = false
             let setupOK = MobileSetup(
-                sharedDir,
-                workDir,
-                cacheDir,
-                4,
-                listen,
-                "",
-                false,
+                setupOptions,
+                platformInterface,
                 &setupError
             )
             if let setupError {
@@ -90,16 +94,8 @@ open class ExtensionProvider: NEPacketTunnelProvider {
         let configPath = FileManager.default.fileExists(atPath: config) ? config : ""
         let configContent = configPath.isEmpty ? config : ""
         let started = MobileStart(
-            sharedDir,
-            workDir,
-            cacheDir,
-            4,
-            listen,
-            "",
-            false,
-            configContent,
             configPath,
-            platformInterface,
+            configContent,
             &error
         )
         if let error {

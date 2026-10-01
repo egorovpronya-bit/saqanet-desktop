@@ -45,11 +45,7 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         if options.getAutoRoute() {
             settings.mtu = NSNumber(value: options.getMTU())
 
-            var dnsError: NSError?
-            let dnsServer = options.getDNSServerAddress(&dnsError)
-            if let dnsError {
-                throw dnsError
-            }
+            let dnsServer = try options.getDNSServerAddress()?.value ?? ""
             let dnsSettings = NEDNSSettings(servers: [dnsServer, "fdfe:dcba:9876::1"])
             dnsSettings.matchDomains = [""]
             dnsSettings.matchDomainsNoSearch = true
@@ -217,13 +213,13 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         }
     }
 
-    public func usePlatformAutoDetectControl() -> Bool {
+    public func usePlatformAutoDetectInterfaceControl() -> Bool {
         false
     }
 
-    public func autoDetectControl(_: Int32) throws {}
+    public func autoDetectInterfaceControl(_: Int32) throws {}
 
-    public func findConnectionOwner(_: Int32, sourceAddress _: String?, sourcePort _: Int32, destinationAddress _: String?, destinationPort _: Int32, ret0_ _: UnsafeMutablePointer<Int32>?) throws {
+    public func findConnectionOwner(_: Int32, sourceAddress _: String?, sourcePort _: Int32, destinationAddress _: String?, destinationPort _: Int32) throws -> LibboxConnectionOwner? {
         throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
     }
 
@@ -280,10 +276,10 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         guard path.status != .unsatisfied,
               let defaultInterface = path.availableInterfaces.first
         else {
-            listener.updateDefaultInterface("", interfaceIndex: -1)
+            listener.updateDefaultInterface("", interfaceIndex: -1, isExpensive: path.isExpensive, isConstrained: path.isConstrained)
             return
         }
-        listener.updateDefaultInterface(defaultInterface.name, interfaceIndex: Int32(defaultInterface.index))
+        listener.updateDefaultInterface(defaultInterface.name, interfaceIndex: Int32(defaultInterface.index), isExpensive: path.isExpensive, isConstrained: path.isConstrained)
     }
 
     public func closeDefaultInterfaceMonitor(_: LibboxInterfaceUpdateListenerProtocol?) throws {
@@ -291,9 +287,11 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         nwMonitor = nil
     }
 
-    public func getInterfaces() throws -> LibboxNetworkInterfaceIteratorProtocol {
+    public func getInterfaces() throws -> LibboxNetworkInterfaceIteratorProtocol? {
         throw NSError(domain: "not implemented", code: 0)
     }
+
+    public func sendNotification(_: LibboxNotification?) throws {}
 
     class networkInterfaceArray: NSObject, LibboxNetworkInterfaceIteratorProtocol {
         private var iterator: IndexingIterator<[LibboxNetworkInterface]>
