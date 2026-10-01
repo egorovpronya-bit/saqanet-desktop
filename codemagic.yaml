@@ -32,24 +32,28 @@ workflows:
           brew install go
           export PATH="$(go env GOPATH)/bin:$PATH"
           # `make ios` builds bin/HiddifyCore.xcframework, but gomobile bind bakes
-          # the Swift module name from the -o basename, so that comes out named
-          # "HiddifyCore" - not "Libcore", the module every Swift file in ios/
+          # the Swift module name from the -o basename (see cmd/gomobile/bind_iosapp.go:
+          # title = strings.Title(basename without .xcframework)), so that comes out
+          # named "HiddifyCore" - not "Libcore", the module every Swift file in ios/
           # imports (see ios/Local Packages/Package.swift's Libcore binaryTarget,
-          # and the direct HiddifyCore.xcframework link in Runner.xcodeproj -
-          # both point at this same file and both need the per-slice framework
-          # inside it to be named Libcore.framework, confirmed against the
-          # previously-committed prebuilt ios/Frameworks/Libcore.xcframework.zip).
-          # `make ios`'s own recipe (below, kept in sync with hiddify-core's
-          # Makefile) is reproduced here with only the -o basename changed, so
-          # gomobile names the module right from the start instead of us
-          # hand-patching the compiled framework afterwards.
+          # and the direct HiddifyCore.xcframework link in Runner.xcodeproj - both
+          # point at this same file and both need the per-slice framework inside it
+          # to be named Libcore.framework, confirmed against the previously-committed
+          # prebuilt ios/Frameworks/Libcore.xcframework.zip). `-libname` is unrelated
+          # to this (it only affects the Android .aar name).
+          # `make ios`'s own recipe (below, kept in sync with hiddify-core's Makefile)
+          # is reproduced here with only the -o basename changed. Deliberately NOT
+          # doing `make ios`'s own `cp Info.plist bin/HiddifyCore.xcframework/` step:
+          # hiddify-core/Info.plist is a static, hand-written file hardcoding
+          # LibraryPath/BinaryPath as "HiddifyCore.framework" - copying it in would
+          # clobber the correct Info.plist that `xcodebuild -create-xcframework`
+          # (invoked internally by gomobile bind) already generated for Libcore.framework.
           make lib_install
           gomobile bind -v -target ios -libname=hiddify-core \
             -tags=with_gvisor,with_quic,with_wireguard,with_utls,with_clash_api,with_grpc,with_awg,tfogo_checklinkname0,with_naive_outbound,with_conntrack,with_dhcp,with_low_memory,with_purego \
             -trimpath -ldflags="-w -s -checklinkname=0 -buildid= ${CODE_VERSION:-}" \
             -o bin/Libcore.xcframework \
             github.com/sagernet/sing-box/experimental/libbox ./platform/mobile
-          cp Info.plist bin/Libcore.xcframework/
           cd ..
           rm -rf ios/Frameworks/HiddifyCore.xcframework
           cp -r hiddify-core/bin/Libcore.xcframework ios/Frameworks/HiddifyCore.xcframework
