@@ -8,8 +8,6 @@ import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.
 import 'package:hiddify/features/common/general_pref_tiles.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/settings/notifier/config_option/config_option_notifier.dart';
-import 'package:hiddify/features/settings/notifier/reset_tunnel/reset_tunnel_notifier.dart';
-import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 enum ConfigOptionSection {
@@ -211,16 +209,6 @@ class SettingsPage extends HookConsumerWidget {
                   namedLocation: context.namedLocation('tlsTricks'),
                   push: true,
                 ),
-                if (PlatformUtils.isIOS)
-                  Material(
-                    child: ListTile(
-                      title: Text(t.pages.settings.resetTunnel),
-                      leading: const Icon(Icons.autorenew_rounded),
-                      onTap: () async {
-                        await ref.read(resetTunnelNotifierProvider.notifier).run();
-                      },
-                    ),
-                  ),
                 SettingsSection(
                   title: t.pages.logs.title,
                   icon: Icons.description_rounded,
@@ -267,16 +255,6 @@ class SettingsPage extends HookConsumerWidget {
                   icon: Icons.content_cut_rounded,
                   namedLocation: context.namedLocation('tlsTricks'),
                 ),
-                if (PlatformUtils.isIOS)
-                  Material(
-                    child: ListTile(
-                      title: Text(t.pages.settings.resetTunnel),
-                      leading: const Icon(Icons.autorenew_rounded),
-                      onTap: () async {
-                        await ref.read(resetTunnelNotifierProvider.notifier).run();
-                      },
-                    ),
-                  ),
               ],
       ),
     );
