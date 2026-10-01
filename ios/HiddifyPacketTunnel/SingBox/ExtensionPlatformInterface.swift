@@ -45,7 +45,7 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         if options.getAutoRoute() {
             settings.mtu = NSNumber(value: options.getMTU())
 
-            let dnsServer = try options.getDNSServerAddress()?.value ?? ""
+            let dnsServer = try options.getDNSServerAddress().value
             let dnsSettings = NEDNSSettings(servers: [dnsServer, "fdfe:dcba:9876::1"])
             dnsSettings.matchDomains = [""]
             dnsSettings.matchDomainsNoSearch = true
@@ -213,13 +213,13 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         }
     }
 
-    public func usePlatformAutoDetectInterfaceControl() -> Bool {
+    public func usePlatformAutoDetectControl() -> Bool {
         false
     }
 
-    public func autoDetectInterfaceControl(_: Int32) throws {}
+    public func autoDetectControl(_: Int32) throws {}
 
-    public func findConnectionOwner(_: Int32, sourceAddress _: String?, sourcePort _: Int32, destinationAddress _: String?, destinationPort _: Int32) throws -> LibboxConnectionOwner? {
+    public func findConnectionOwner(_: Int32, sourceAddress _: String?, sourcePort _: Int32, destinationAddress _: String?, destinationPort _: Int32) throws -> LibboxConnectionOwner {
         throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
     }
 
@@ -287,11 +287,11 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         nwMonitor = nil
     }
 
-    public func getInterfaces() throws -> LibboxNetworkInterfaceIteratorProtocol? {
+    public func getInterfaces() throws -> LibboxNetworkInterfaceIteratorProtocol {
         throw NSError(domain: "not implemented", code: 0)
     }
 
-    public func sendNotification(_: LibboxNotification?) throws {}
+    public func send(_: LibboxNotification?) throws {}
 
     class networkInterfaceArray: NSObject, LibboxNetworkInterfaceIteratorProtocol {
         private var iterator: IndexingIterator<[LibboxNetworkInterface]>
