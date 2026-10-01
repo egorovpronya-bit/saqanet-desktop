@@ -90,6 +90,30 @@ workflows:
         script: |
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
+
+      - name: Symbolicate known crash addresses (diagnostic, remove once root-caused)
+        script: |
+          ARCHIVE=$(find build/ios/archive -maxdepth 1 -name "*.xcarchive" | head -1)
+          echo "Archive: $ARCHIVE"
+          find "$ARCHIVE/dSYMs" -maxdepth 1 2>/dev/null
+
+          RUNNER_DSYM=$(find "$ARCHIVE/dSYMs" -iname "Runner.app.dSYM" | head -1)
+          RUNNER_BASE=4298964992
+          printf -v BASEH '0x%x' $RUNNER_BASE
+          printf -v A1 '0x%x' $((RUNNER_BASE+723556))
+          printf -v A2 '0x%x' $((RUNNER_BASE+719052))
+          echo "=== Runner (crashing thread, SIGABRT trigger) ==="
+          xcrun atos -arch arm64 -o "$RUNNER_DSYM/Contents/Resources/DWARF/Runner" -l $BASEH $A1 $A2 || echo "atos failed for Runner"
+
+          FLUTTER_DSYM=$(find "$ARCHIVE/dSYMs" -iname "Flutter.framework.dSYM" | head -1)
+          FLUTTER_BASE=4397432832
+          printf -v FBASEH '0x%x' $FLUTTER_BASE
+          printf -v F1 '0x%x' $((FLUTTER_BASE+5169068))
+          printf -v F2 '0x%x' $((FLUTTER_BASE+90560))
+          printf -v F3 '0x%x' $((FLUTTER_BASE+368424))
+          printf -v F4 '0x%x' $((FLUTTER_BASE+368084))
+          echo "=== Flutter.framework (main thread, concurrent activity) ==="
+          xcrun atos -arch arm64 -o "$FLUTTER_DSYM/Contents/Resources/DWARF/Flutter" -l $FBASEH $F1 $F2 $F3 $F4 || echo "atos failed for Flutter"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
