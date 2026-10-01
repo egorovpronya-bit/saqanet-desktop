@@ -251,13 +251,13 @@ class RoutingConfigNotifier extends _$RoutingConfigNotifier {
                             ),
                           ],
                         ),
-                        GoRoute(
-                          name: 'perAppProxy',
-                          path: 'per-app-proxy',
-                          pageBuilder: (_, state) =>
-                              customTransition(TransitionType.slide, state.pageKey, const PerAppProxyPage()),
-                        ),
                       ],
+                    ),
+                    GoRoute(
+                      name: 'perAppProxy',
+                      path: 'per-app-proxy',
+                      pageBuilder: (_, state) =>
+                          customTransition(TransitionType.slide, state.pageKey, const PerAppProxyPage()),
                     ),
                     GoRoute(
                       name: 'dnsOptions',

@@ -14,6 +14,7 @@ import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
+import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
@@ -149,6 +150,7 @@ class HomePage extends HookConsumerWidget {
                 const Column(children: [ConnectionButton(), ActiveProxyDelayIndicator()]),
                 const Gap(8),
                 _TrafficCard(uplinkTotal: stats.uplinkTotal.toInt(), downlinkTotal: stats.downlinkTotal.toInt()),
+                const ActiveProxyFooter(),
                 const Gap(8),
                 Expanded(
                   child: switch (profilesAsync) {

@@ -1,0 +1,736 @@
+{
+  "common": {
+    "appTitle": "SAQANet",
+    "start": "Саҕалаа",
+    "version": "Версия",
+    "ok": "Сөп",
+    "cancel": "Аккаастаа",
+    "kContinue": "Салгыы",
+    "showMore": "Элбэҕи көрдөр",
+    "showLess": "Аҕыйаҕы көрдөр",
+    "filter": "Фильтр",
+    "all": "Барыта",
+    "pause": "Тохтот",
+    "resume": "Салгыы",
+    "clear": "Ыраас",
+    "close": "Сап",
+    "auto": "Авто",
+    "manually": "Бэйэҥ",
+    "name": "Аат",
+    "url": "URL",
+    "add": "Эб",
+    "clipboard": "Буфер",
+    "addToClipboard": "Буферга эб",
+    "scanQr": "QR-ы ааҕ",
+    "free": "Күндэтэ суох",
+    "warp": "WARP",
+    "fragment": "Фрагмент",
+    "help": "Көмө",
+    "save": "Хадаар",
+    "update": "Саҥардаа",
+    "share": "Үллэс",
+    "edit": "Уларыт",
+    "delete": "Сот",
+    "discard": "Аккаастаа",
+    "import": "Импорт",
+    "export": "Экспорт",
+    "later": "Кэлин",
+    "ignore": "Болҕото суох",
+    "quit": "Тахсыы",
+    "notSet": "Ууруллубатах",
+    "hide": "Кистээ",
+    "exit": "Тахсыы",
+    "reset": "Төннөрүү",
+    "done": "Бэлэм",
+    "decline": "Аккаастаа",
+    "agree": "Сөп",
+    "empty": "Хоос",
+    "unknown": "Биллибэт",
+    "hidden": "Кистэммит",
+    "timeout": "Тайм-аут",
+    "sort": "Араар",
+    "dashboard": "Салайыы",
+    "disable": "Сап",
+    "psiphon": "Psiphon",
+    "profile": "Профиль",
+    "configuration": "Конфигурация",
+    "file": "Файл",
+    "interval": {
+      "day": {
+        "zero": "",
+        "one": "$n күн",
+        "few": "$n күн",
+        "many": "$n күн",
+        "other": "$n күн"
+      },
+      "hour": {
+        "zero": "",
+        "one": "$n чаас",
+        "few": "$n чаас",
+        "many": "$n чаас",
+        "other": "$n чаас"
+      }
+    },
+    "msg": {
+      "permission": {
+        "denied": "Көҥүл суох"
+      },
+      "export": {
+        "clipboard": {
+          "success": "Буферга ситиһиилээхтик эбилиннэ",
+          "failure": "Буферга суруллубата",
+          "contentTooLarge": "Контент ураты улахан. Файлга экспордаа"
+        },
+        "file": {
+          "success": "JSON файл ситиһиилээхтик оҥоһулунна",
+          "failure": "Файл оҥоһулунна суох"
+        }
+      },
+      "import": {
+        "confirm": "Импорду бигэргэт",
+        "success": "Ситиһиилээхтик импордаммыт",
+        "failure": "Импордаммата"
+      },
+      "autoSave": {
+        "success": "Уларытыылар аптамаатынан хадаарылынна"
+      }
+    }
+  },
+  "intro": {
+    "banner": "Хааччахтаммат интернеккэ наадалаах барыта",
+    "termsAndPolicyCaution(rich)": "Салгыы тутан эн ${tap(@:pages.about.termsAndConditions)} сөбүлэс буолаҕын",
+    "info(rich)": "© 2026 SAQANet · ${tap_source(Telegram)} · ${tap_license(Лицензия)}"
+  },
+  "pages": {
+    "home": {
+      "title": "Дьиэ",
+      "quickSettings": "Түргэн тэрийии опциялара"
+    },
+    "proxies": {
+      "title": "Прокси",
+      "sort": "Проксилары араар",
+      "testDelay": "Хаамыыны бэрэбиэркэлээ",
+      "empty": "Прокси суох",
+      "activeProxy": "Үлэлии турар прокси",
+      "unknownIp": "Биллибэт IP",
+      "sortOptions": {
+        "unsorted": "Төрүт",
+        "name": "Ааккынан",
+        "delay": "Хаамыытынан",
+        "usage": "Туттулунуутунан"
+      },
+      "ipInfo": {
+        "address": "IP-адрес",
+        "country": "Дойду",
+        "organization": "Тэрилтэ"
+      },
+      "delay": {
+        "result": "Хаамыы: ${delay} мс",
+        "timeout": "Хаамыыны бэрэбиэркэлиир тайм-аут",
+        "testing": "Хаамыы: бэрэбиэркэлэнэр..."
+      }
+    },
+    "profiles": {
+      "title": "Профиллар",
+      "add": "Профиль эб",
+      "update": "Профили саҥардаа",
+      "viewAllProfiles": "Бары профиллары көр",
+      "activeProfileName": "Үлэлии турар профиль аата: \"${name}\".",
+      "nonActiveProfileName": "\"${name}\" үлэлии турар профиль оҥор",
+      "freeSubNotFound": "Күндэтэ суох подписка булуллубата",
+      "freeSubNotFoundForRegion": "\"${region}\" региоҥҥа күндэтэ суох подписка булуллубата",
+      "failedToLoad": "Киллэриллибэтэ",
+      "updateSubscriptions": "Подпискалары саҥардаа",
+      "share": {
+        "urlToClipboard": "URL-ы буферга",
+        "showUrlQr": "URL QR-кодун көрдөр",
+        "jsonToClipboard": "JSON-ы буферга"
+      },
+      "msg": {
+        "save": {
+          "success": "Профиль ситиһиилээхтик хадаарылынна"
+        },
+        "invalidUrl": "Сыыһа URL",
+        "add": {
+          "failure": "Профиль эбиллибэтэ"
+        },
+        "update": {
+          "success": "Профиль ситиһиилээхтик саҥардылынна",
+          "successNamed": "\"${name}\" ситиһиилээхтик саҥардылынна",
+          "failure": "Профиль саҥардылынна суох",
+          "failureNamed": "\"${name}\" саҥардылынна суох"
+        },
+        "delete": {
+          "success": "Профиль ситиһиилээхтик сотулунна"
+        }
+      }
+    },
+    "profileDetails": {
+      "title": "Профиль",
+      "lastUpdate": "Бэрт кэнниги саҥардыы",
+      "form": {
+        "nameHint": "Профиль аата",
+        "emptyName": "Аат толорулуннун наада",
+        "invalidUrl": "Сыыһа URL",
+        "urlHint": "Конфигурация толору URL-а",
+        "disableAutoUpdate": "Аптамаат саҥардыыны сап",
+        "autoUpdateInterval": "Аптамаат саҥардыы интервала",
+        "loading": "Профиль эбиллэр..."
+      }
+    },
+    "logs": {
+      "title": "Логтар",
+      "shareCoreLogs": "Ядро логтарын үллэс",
+      "shareAppLogs": "Аппын логтарын үллэс"
+    },
+    "about": {
+      "title": "Программа туһунан",
+      "notAvailableMsg": "Эн бэрт кэнниги версияны туттаҕын",
+      "checkForUpdate": "Саҥардыыны бэрэбиэркэлээ",
+      "openWorkingDir": "Үлэ папкатын ас",
+      "sourceCode": "Исходнай код",
+      "telegramChannel": "Telegram каналын",
+      "termsAndConditions": "Туттар усулуобуйалара",
+      "privacyPolicy": "Куттал кистэлэҥ политиката"
+    },
+    "settings": {
+      "title": "Тэрийии",
+      "resetTunnel": "VPN профили төннөр",
+      "options": {
+        "import": {
+          "clipboard": "Тэрийиини буфертан импордаа",
+          "file": "Тэрийиини файлтан импордаа"
+        },
+        "export": {
+          "anonymousToClipboard": "Аата суох тэрийиини буферга көҕүр",
+          "anonymousToFile": "Аата суох тэрийиини файлга экспордаа",
+          "allToClipboard": "Бары тэрийиини буферга көҕүр",
+          "allToFile": "Бары тэрийиини файлга экспордаа"
+        },
+        "reset": "Тэрийиини төннөр"
+      },
+      "general": {
+        "title": "Тыл",
+        "locale": "Тыл",
+        "themeMode": "Тыыннаах көрүҥэ",
+        "themeModes": {
+          "system": "Систиэмэ",
+          "dark": "Хараҥа",
+          "light": "Чaҕылхай",
+          "black": "Хара"
+        },
+        "enableAnalytics": "Аналитиканы арый",
+        "enableAnalyticsMsg": "Аппын тупсарарга аналитика хомуйууту уонна сыыһа отчуоттарын ыытарга көҥүл бэр",
+        "autoIpCheck": "IP-адреhы аптамаатынан бэрэбиэркэлээ",
+        "dynamicNotification": "Түргэни уведомлениеҕа көрдөр",
+        "hapticFeedback": "Долгуйуу эппиэтэ",
+        "actionAtClosing": "Саппытыгар гыныы",
+        "autoStart": "Систиэмэҕэ киирэн саҕалаа",
+        "silentStart": "Кирилиннэн саҕалаа",
+        "ignoreBatteryOptimizations": "Батарея оптимизациятын сап",
+        "ignoreBatteryOptimizationsMsg": "VPN сатаан үлэлиэн туһугар хааччахтары устар",
+        "memoryLimit": "Чагылхай хааччаҕа",
+        "memoryLimitMsg": "Чагылхай ситимнээбэт эбэтэр аппын элбэхтик охсуллар буоллаҕына арый",
+        "debugMode": "Дьүккэтиир көрүҥэ",
+        "debugModeMsg": "Бу уларытыыны туттарарга аппын саҥаттан саҕалаа",
+        "logLevel": "Лог таhыма",
+        "connectionTestUrl": "Холбонуу бэрэбиэркэтин URL-а",
+        "urlTestInterval": "URL бэрэбиэркэ интервала",
+        "clashApiPort": "Clash API порта",
+        "useXrayCoreWhenPossible": "Сатанар буоллаҕына xray-core туруу",
+        "useXrayCoreWhenPossibleMsg": "Подписка ситимин холбуурга xray-core туруу. Бу опцияны арыйарга ситими саҥаттан импордаа наада.",
+        "confirmRemoveProfile": "Профили сотторго бигэргэтиини эрэй",
+        "autoConnectOnStart": "Саҕаланыыга аптамаатынан холбоо",
+        "autoConnectOnStartMsg": "Аппын саҕалыырыгар талыллыбыт сервер±гэр аптамаатынан холбоо (ситиспэт да буолуон сөп)"
+      },
+      "routing": {
+        "title": "Маршрутизация",
+        "routeRule": {
+          "empty": "Билигин сокуон суох\n\n+ баттаан саҥа сокуону оҥор эбэтэр бэлэм сокуонтан талыс",
+          "delete": "Сокуону сот",
+          "create": "Саҥа сокуону оҥор",
+          "options": {
+            "import": {
+              "clipboard": "Сокуоннары буфертан импордаа",
+              "file": "Сокуоннары файлтан импордаа"
+            },
+            "export": {
+              "clipboard": "Сокуоннары буферга көҕүр",
+              "file": "Сокуоннары файлга хадаар"
+            },
+            "reset": "Сокуоннары төннөр"
+          },
+          "rule": {
+            "title": "Сокуон",
+            "onlyTunMode": "TUN көрүҥэ эрэ туттуллар",
+            "notAvailabeInThisPlatform": "Бу платформаҕа туттуллубат",
+            "canNotBeEmpty": "Хоос буолбатах",
+            "validUrlEx": "https://example.com",
+            "validUrl": "Сөптөөх \"URL\", холобур\n@:pages.settings.routing.routeRule.rule.validUrlEx",
+            "validProcessNameEx": "Chrome.exe эбэтэр google chrome эбэтэр chrome",
+            "validProcessName": "Сөптөөх \"Процесс аата\", холобур\n@:pages.settings.routing.routeRule.rule.validProcessNameEx",
+            "validProcessPathEx": "C:\\Pro...\\chrome.exe\n/App.../Google Chrome\n/usr/lib.../chrome",
+            "validProcessPath": "Сөптөөх \"Процесс суола\", холобур\n@:pages.settings.routing.routeRule.rule.validProcessPathEx",
+            "validPortRangeEx": "80 эбэтэр 1-65000",
+            "validPortRange": "Сөптөөх \"Порт\" эбэтэр \"Порт araaha\", холобур\n@:pages.settings.routing.routeRule.rule.validPortRangeEx",
+            "validIpCidrEx": "8.8.8.8 эбэтэр 10.0.0.0/24",
+            "validIpCidr": "Сөптөөх IP CIDR, холобур\n@:pages.settings.routing.routeRule.rule.validIpCidrEx",
+            "validDomainEx": "Google.com эбэтэр dl.google.com",
+            "validDomain": "Сөптөөх \"Домен\", холобур\n@:pages.settings.routing.routeRule.rule.validDomainEx",
+            "validDomainSuffixEx": ".com эбэтэр .ru",
+            "validDomainSuffix": "Сөптөөх \"Домен сыaha\", холобур\n@:pages.settings.routing.routeRule.rule.validDomainSuffixEx",
+            "tileTitle(map)": {
+              "name": "Аат",
+              "outbound": "Тэҥнэhэрэ тахсар",
+              "rule_set": "Сокуон хомуурунньук URL-а",
+              "package_name": "Пакет аата",
+              "process_name": "Процесс аата",
+              "process_path": "Процесс суола",
+              "network": "Ситим",
+              "port_range": "Тиийэр порт araaha",
+              "source_port_range": "Тахсар порт araaha",
+              "protocol": "Протокол",
+              "ip_cidr": "Тиийэр IP CIDR",
+              "source_ip_cidr": "Тахсар IP CIDR",
+              "domain": "Домен",
+              "domain_suffixe": "Домен сyaha",
+              "domain_keyword": "Домен тыла",
+              "domain_regex": "Домен регулярнай выражениета"
+            },
+            "outbound(map)": {
+              "proxy": "Прокси",
+              "direct": "Туспа",
+              "direct_with_fragment": "Туспа, фрагмeннан",
+              "block": "Хааччах"
+            },
+            "network(map)": {
+              "all": "Барыта",
+              "tcp": "TCP",
+              "udp": "UDP"
+            },
+            "protocol(map)": {
+              "": "Барыта",
+              "tls": "TLS",
+              "http": "HTTP",
+              "quic": "QUIC",
+              "stun": "STUN",
+              "dns": "DNS",
+              "bittorrent": "BitTorrent"
+            }
+          },
+          "genericList": {
+            "addNew": "Саҥа суолтаны эб",
+            "update": "Суолтаны саҥардаа",
+            "clearList": "Испииһэги ыраастаа",
+            "clearListMsg": "Бары элементтэр сотулунна"
+          }
+        },
+        "generalOptions": {
+          "title": "Маршрутизация тыл параметрдара",
+          "region": "Регион",
+          "regions": {
+            "ir": "Иран (ir)",
+            "cn": "Кытай (cn)",
+            "ru": "Арассыыйа (ru)",
+            "af": "Афганистан (af)",
+            "id": "Индонезия (id)",
+            "tr": "Турция (tr)",
+            "br": "Бразилия (br)",
+            "other": "Атын"
+          },
+          "balancerStrategy": {
+            "title": "Balancer стратегията",
+            "roundRobin": "Round robin",
+            "consistentHash": "Consistent hash",
+            "stickySession": "Sticky session"
+          },
+          "resolveDestination": "Тиийэр адреhи быhаар",
+          "ipv6Route": "IPv6 маршрута",
+          "ipv6Modes": {
+            "disable": "Сап",
+            "enable": "Арый",
+            "prefer": "Бастаан туттар",
+            "only": "Эрэ"
+          },
+          "perAppProxy": {
+            "title": "Аппар прокси",
+            "hideSysApps": "Систиэмэ аппарын кистээ",
+            "options": {
+              "import": {
+                "clipboard": "Талыыны буфертан импордаа",
+                "file": "Талыыны файлтан импордаа",
+                "msg": "Импорт билиҥҥи талыыгын уларытыаҕа. Бигэ дуо?"
+              },
+              "export": {
+                "clipboard": "Талыыны буферга көҕүр",
+                "file": "Талыыны файлга экспордаа"
+              },
+              "shareToAll": "Бары±гар үллэс",
+              "clearAllSelections": "Бары талыыны ыраастаа"
+            },
+            "modes": {
+              "all": "Барыта",
+              "proxy": "Прокси",
+              "bypass": "Тумнан ааhыы",
+              "allMsg": "Бары аппы прокситаан",
+              "proxyMsg": "Талыллыбыт аппы эрэ прокситаан",
+              "bypassMsg": "Талыллыбыт аппы прокситама"
+            },
+            "autoSelection": {
+              "title": "Аптамaaт талыы",
+              "performNow": "Билигин оҥор",
+              "resetToDefault": "Төрүккэ төннөр",
+              "autoUpdateInterval": "Аптамaaт саҥардыы интервала",
+              "toast": {
+                "success": "Аппы аптамaaт талыы ситиһиилээхтик бүттэ",
+                "failure": "Аптамaaт талыы сыыhаламмыт",
+                "regionNotFound": "\"${region}\" региоҥҥа аптамaaт талыы булуллубата",
+                "alreadyInAuto": "Эн талыыҥ аптамaaт испииһэккэ баар"
+              },
+              "dialog": {
+                "title": "Аппы аптамaaт талыы",
+                "msg": "Аппар прокси аптамaaт талыыта регион \"${region}\" диэки уларыйыытыттан саппылынна"
+              }
+            }
+          }
+        },
+        "predefinedRules": {
+          "title": "Бэлэм сокуоннар",
+          "ads": {
+            "name": "Рекламаны хааччах",
+            "description": ""
+          },
+          "bypassLan": {
+            "name": "LAN-ы тумнан аас",
+            "description": ""
+          }
+        }
+      },
+      "dns": {
+        "title": "DNS",
+        "remoteDns": "Ыраах DNS",
+        "remoteDnsDomainStrategy": "Ыраах DNS домен стратегията",
+        "directDns": "Туспа тахсар сервер быhаарааччыта",
+        "directDnsDomainStrategy": "Туспа тахсар домен стратегията",
+        "enableFakeDns": "Сымыйа DNS-ы арый",
+        "domainStrategy": {
+          "auto": "Авто",
+          "preferIpv6": "IPv6-ы бастаан туттар",
+          "preferIpv4": "IPv4-ы бастаан туттар",
+          "ipv4Only": "IPv4 эрэ",
+          "ipv6Only": "IPv6 эрэ"
+        }
+      },
+      "inbound": {
+        "title": "Киирэр",
+        "serviceMode": "Сулууспа көрүҥэ",
+        "serviceModes": {
+          "proxy": "Прокси-сулууспа эрэ",
+          "systemProxy": "Систиэмэ проксиетын туруор",
+          "tun": "VPN"
+        },
+        "shortServiceModes": {
+          "proxy": "Прокси",
+          "systemProxy": "Систиэмэ прокси",
+          "tun": "VPN"
+        },
+        "strictRoute": "Хатаммыт маршрутизация",
+        "tunImplementation": "TUN толоруута",
+        "tunImplementations": {
+          "mixed": "Хатыыламмыт",
+          "system": "Систиэмэ",
+          "gvisor": "gVisor"
+        },
+        "mixedPort": "Хатыыламмыт порт",
+        "tproxyPort": "Арыый прокси порта",
+        "directPort": "Туспа локальнай порт",
+        "redirectPort": "Атыннык ыытар порт",
+        "lanSharing": "VPN-ы үллэстии",
+        "lanSharingPasswordNotSet": "Пароль ууруллубатах",
+        "lanSharingPassword": "VPN үллэстии пароля",
+        "copyLink": "Сыhыаны көҕүр",
+        "qrCode": "QR-код",
+        "lanIPError": "Локальнай IP-адреhи ылбата"
+      },
+      "tlsTricks": {
+        "title": "TLS хитрэстэрэ",
+        "enable": "Фрагментацияны арый",
+        "packets": "Фрагментация пакеттара",
+        "packetsTlsHello": "TLS Hello",
+        "packets1_1": "1-1",
+        "packets1_2": "1-2",
+        "packets1_3": "1-3",
+        "packets1_4": "1-4",
+        "packets1_5": "1-5",
+        "size": "Фрагмент улахана",
+        "sleep": "Фрагмент тохтуута",
+        "mixedSniCase": {
+          "enable": "Хатыыламмыт SNI регистрын арый"
+        },
+        "padding": {
+          "enable": "Эбиини арый",
+          "size": "Эбии улахана"
+        }
+      },
+      "chain": {
+        "title": "Сыhыы",
+        "subtitle": "Эбии куттал кистэлэҥэ уонна Арыйааччы",
+        "finalIp": "Бүтэhик IP",
+        "levels": {
+          "app": {
+            "title": "Апп",
+            "msg": "Киирэр сир: аппыҥ трафига бу сиргэ сыhыыга киирэр уонна бүтэhик тумнан ааhыыга бэлэмнэнэргэ аллараа кирдьиктэри ааhар"
+          },
+          "extraSecurity": {
+            "title": "Эбии куттал кистэлэҥэ",
+            "msg": "Төрүт профиль эрэллээх буолбатах да буоллар дьиэ буоллун диэн эбии хаачхы эбэр"
+          },
+          "mainProfile": {
+            "title": "Төрүт профиль"
+          },
+          "unblocker": {
+            "title": "Арыйааччы",
+            "msg": "Ситим хааччахтарын тумнан ааhарга көмөлөhөр. Көмөлөhөөччү холбоно турар эрэ буоллаҕына, төрүт профиль билигин хааччахтаммыт да буоллар салгыы үлэлиир сатаан иhэр"
+          },
+          "filtering": {
+            "title": "Фильтрация",
+            "msg": "Бүтэhик тахсыы: үлэлии турар кирдьиктэри (Эбии куттал кистэлэҥин, Төрүт профили эбэтэр Арыйааччыны) ааhан, эппиэттэрин туттаран, трафигыҥ бүтэhигэр локальнай ситим фильтрациятын тумнан ааhар"
+          }
+        },
+        "warp": {
+          "missingConfig": "WARP конфигурацията суох",
+          "licenseKey": "Лицензия түлбэтэ",
+          "cleanIp": "Чиэс IP",
+          "port": "Порт",
+          "noise": {
+            "count": "Шум ахсаана",
+            "mode": "Шум көрүҥэ",
+            "size": "Шум улахана",
+            "delay": "Шум тохтуута"
+          }
+        },
+        "psiphon": {
+          "selectServerRegion": "Сервер региоhун талыс",
+          "regions": {
+            "auto": "@:common.auto",
+            "at": "Австрия (at)",
+            "au": "Австралия (au)",
+            "be": "Бельгия (be)",
+            "bg": "Болгария (bg)",
+            "ca": "Канада (ca)",
+            "ch": "Швейцария (ch)",
+            "cz": "Чехия (cz)",
+            "de": "Германия (de)",
+            "dk": "Дания (dk)",
+            "ee": "Эстония (ee)",
+            "es": "Испания (es)",
+            "fi": "Финляндия (fi)",
+            "fr": "Франция (fr)",
+            "gb": "Улахан Британия (gb)",
+            "hr": "Хорватия (hr)",
+            "hu": "Венгрия (hu)",
+            "ie": "Ирландия (ie)",
+            "in": "Индия (in)",
+            "it": "Италия (it)",
+            "jp": "Япония (jp)",
+            "lv": "Латвия (lv)",
+            "nl": "Нидерланды (nl)",
+            "no": "Норвегия (no)",
+            "pl": "Польша (pl)",
+            "pt": "Португалия (pt)",
+            "ro": "Румыния (ro)",
+            "rs": "Сербия (rs)",
+            "se": "Швеция (se)",
+            "sg": "Сингапур (sg)",
+            "sk": "Словакия (sk)",
+            "us": "АХШ (us)"
+          }
+        },
+        "profile": {
+          "selectProfile": "Профили талыс",
+          "conduitPairingId": "Conduit холбоhуу ID-та"
+        }
+      }
+    }
+  },
+  "components": {
+    "stats": {
+      "connection": "Холбонуу",
+      "traffic": "Трафик",
+      "trafficLive": "Билиҥҥи трафик",
+      "trafficTotal": "Бары трафик",
+      "uplink": "Ыытыы",
+      "downlink": "Ылыы",
+      "speed": "Түргэн",
+      "totalTransferred": "Барытыгар көhөрүллүбүт"
+    },
+    "subscriptionInfo": {
+      "upload": "Ыытылынна",
+      "download": "Ылылынна",
+      "total": "Трафик барыта",
+      "expireDate": "Бүтэр күнэ",
+      "expired": "Бүппүт",
+      "noTraffic": "Квота бүппүт",
+      "remainingTime": "Хаалбыт кэм",
+      "remainingDuration": "${duration} хонук хаалла",
+      "remainingDurationNew": "${duration} хонук",
+      "remainingTrafficSemanticLabel": "${total} трафиктан ${consumed} туттулунна",
+      "remainingTraffic": "Хаалбыт трафик",
+      "remainingUsage": "Хаалла",
+      "profileSite": "Провайдер",
+      "profileSupport": "Көмө"
+    }
+  },
+  "dialogs": {
+    "sortProfiles": {
+      "title": "Арааран",
+      "sort": {
+        "name": "Ааккынан",
+        "lastUpdate": "Бэрт кэнниги саҥардыытынан"
+      }
+    },
+    "warpLicense": {
+      "title": "Cloudflare WARP сокуона",
+      "description(rich)": "Cloudflare WARP — күндэтэ суох WireGuard VPN провайдер. Бу опцияны арыйан, эн Cloudflare WARP ${tos(Туттар усулуобуйаларын)} уонна ${privacy(Куттал кистэлэҥ политикатын)} сөбүлэс буолаҕын."
+    },
+    "psiphonLicense": {
+      "title": "Psiphon лицензия сокуона",
+      "description(rich)": "Psiphon туттан, эн ${tos(Туттар усулуобуйаларын)} сөбүлэс буолаҕын уонна ${privacy(Куттал кистэлэҥ политикатын)} бигэргэтэҕин. Салгыы иннинэ толору ааҕыҥ."
+    },
+    "newVersion": {
+      "title": "Саҥардыы баар",
+      "msg": "@:common.appTitle саҥа версията баар. Билигин саҥардыахха дуо?",
+      "currentVersion": "Билиҥҥи версия: ",
+      "newVersion": "Саҥа версия: ",
+      "updateNow": "Билигин саҥардаа"
+    },
+    "confirmation": {
+      "settings": {
+        "import": {
+          "msg": "Бу бары конфигурация параметрдарын бэриллибит суолталарынан уларытыаҕа. Бигэ дуо?"
+        }
+      },
+      "profile": {
+        "delete": {
+          "title": "Профили сот",
+          "msg": "Бу профили үйэлэргэ сотторго бигэ дуо?"
+        }
+      },
+      "perAppProxy": {
+        "shareOnGithub": {
+          "title": "Аптамaaт талыыны тупсарыы",
+          "msg": "Талыллыбыт аппарыгын үллэhэн, \"аптамaaт талыы\" испииhэгин байытаргар көмөлөhөҕүн"
+        },
+        "import": {
+          "msg": "Бу бары билиҥҥи аппар прокси тэрийиигиҥ уларытыаҕа. Бигэ дуо?"
+        }
+      },
+      "routeRule": {
+        "delete": {
+          "title": "Сокуону сот",
+          "msg": "\"$rulename\" сокуону сотторго бигэ дуо?"
+        }
+      },
+      "addProfileByDeepLinkWarning": {
+        "title": "Профили эбиэххэ дуо?",
+        "message": "\"${host}\" тахсар сыhыа саҥа профили эбэргэ көрдөhөр. Импордуохха дуо?"
+      },
+      "importRouteRuleByDeepLinkWarning": {
+        "title": "Маршрутизация сокуонун импордуохха дуо?",
+        "message": "Эрэллээх буолбатах сир-дойдуттан маршрутизация сокуоннарын импордооhун куттал буолуон сатаныыта баар\nБу сыhыаҕа эрэллээх буоллаххына эрэ салгыы бар"
+      }
+    },
+    "experimentalNotice": {
+      "title": "Эксперименталлыы функциялар туттуллар",
+      "msg": "Эн холбонуу чааhыгар уонна көрдөрбөт сыыhалары таhаарыан сатанар эксперименталлыы функциялары арыйдыҥ. Бу параметрдары тэрийии сирэйигэр хайаан да уларытыаххыҥ эбэтэр төннөрүөххүн сатанар.",
+      "disable": "Ити хаалла көрдөрүмэ"
+    },
+    "noActiveProfile": {
+      "title": "Профили эб",
+      "msg": "Үлэни саҕалыырга холбонуу профилин эб.\n\nСаарбах түлбэни подписка ылбыт кэннэ SAQANet Telegram-ботуттан ылыахха сөп.",
+      "helpBtn": {
+        "label": "Боту ас",
+        "url": "https://t.me/SAQANet_bot"
+      }
+    },
+    "unknownDomainsWarning": {
+      "title": "Тахсар сыhыа туhунан сэрэтии",
+      "youAreAboutToVisit": "Эн бу сайтка тахсаргар бэлэмниигин:",
+      "thisWebsiteIsNotInOurTrustedList": "Бу сайт биhиги эрэллээх испииhэкпитигэр суох. Сэрэхтээхтик гын."
+    },
+    "proxyInfo": {
+      "fullTag": "Толору тег:",
+      "type": "Көрүҥэ:",
+      "testTime": "Бэрэбиэркэ кэмэ:",
+      "testDelay": "Бэрэбиэркэ хаамыыта:",
+      "isSelected": "Талыллыбыт:",
+      "isGroup": "Бу бөлөх",
+      "isSecure": "Куттал кистэлэҥнээх:",
+      "port": "Порт:",
+      "host": "Хост:",
+      "ip": "IP:",
+      "countryCode": "Дойду кода:",
+      "region": "Регион:",
+      "city": "Куорат:",
+      "asn": "ASN:",
+      "organization": "Тэрилтэ:",
+      "location": "Сир:",
+      "postalCode": "Почта индекса:",
+      "download": "Ылылынна:",
+      "upload": "Ыытылынна:"
+    },
+    "windowClosing": {
+      "askEachTime": "Хас гынан ыйыт",
+      "alertMessage": "Аппы кистээ эбэтэр тахсыаххын дуо?",
+      "remember": "Талыыбын өйдөө"
+    }
+  },
+  "connection": {
+    "tapToConnect": "Холбонорго баттаа",
+    "connect": "Холбоо",
+    "connecting": "Холбонор...",
+    "connected": "Холбоммут",
+    "disconnect": "Быhаар",
+    "disconnecting": "Быhаарыллар...",
+    "reconnect": "Саҥаттан холбоо",
+    "reconnectMsg": "Уларытыылары туттараргар саҥаттан холбонор..."
+  },
+  "errors": {
+    "unexpected": "Көрдөрбөт сыыhа",
+    "connection": {
+      "unexpected": "Холбонуу көрдөрбөт сыыhата",
+      "timeout": "Холбонуу тайм-аута",
+      "badResponse": "Сыыhа эппиэт",
+      "connectionError": "Холбонуу сыыhата",
+      "badCertificate": "Сыыhа сертификат"
+    },
+    "profiles": {
+      "unexpected": "Көрдөрбөт сыыhа",
+      "notFound": "Профиль булуллубата",
+      "invalidConfig": "Сыыhа конфигурация",
+      "invalidUrl": "Сыыhа URL",
+      "canceledByUser": "Туттааччы аккаастаата"
+    },
+    "connectivity": {
+      "unexpected": "Көрдөрбөт охсулла",
+      "missingVpnPermission": "VPN көҥүлэ суох",
+      "missingNotificationPermission": "Уведомление көҥүлэ суох",
+      "core": "Ядро сыыhата"
+    },
+    "singbox": {
+      "serviceNotRunning": "Сулууспа үлэлээбэт",
+      "missingPrivilege": "Бырааптар суохтар",
+      "missingPrivilegeMsg": "VPN көрүҥэ администратор бырааптарын эрэйэр. Аппы администратор аатыттан саҥаттан саҕала эбэтэр сулууспа көрүҥүн уларыт.",
+      "invalidConfigOptions": "Сыыhа конфигурация параметрдара",
+      "invalidConfig": "Сыыhа конфигурация"
+    },
+    "warp": {
+      "missingLicense": "Warp лицензията суох",
+      "missingLicenseMsg": "Талыллыбыт профиль WARP функцията туттар; бу функцияны туттарга WARP лицензиятын сөбүлэhэргэ наада"
+    },
+    "psiphon": {
+      "missingLicense": "Psiphon лицензията наада",
+      "missingLicenseMsg": "Талыллыбыт профиль Psiphon функцията туттар; бу функцияны туттарга Psiphon лицензиятын сөбүлэhэргэ наада"
+    }
+  }
+}

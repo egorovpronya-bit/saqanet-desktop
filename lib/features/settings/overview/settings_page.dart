@@ -174,6 +174,54 @@ class SettingsPage extends HookConsumerWidget {
                   onChanged: ref.read(Preferences.autoConnectOnStart.notifier).update,
                 ),
                 SettingsSection(
+                  title: t.pages.settings.general.title,
+                  icon: Icons.layers_rounded,
+                  namedLocation: context.namedLocation('general'),
+                  push: true,
+                ),
+                if (ref.watch(hasAnyProfileProvider).value ?? false)
+                  SettingsSection(
+                    title: t.pages.settings.chain.title,
+                    icon: Icons.webhook_rounded,
+                    subtitle: Text(t.pages.settings.chain.subtitle),
+                    namedLocation: context.namedLocation('chainOptions'),
+                    push: true,
+                  ),
+                SettingsSection(
+                  title: t.pages.settings.routing.title,
+                  icon: Icons.route_rounded,
+                  namedLocation: context.namedLocation('routingOptions'),
+                  push: true,
+                ),
+                SettingsSection(
+                  title: t.pages.settings.dns.title,
+                  icon: Icons.dns_rounded,
+                  namedLocation: context.namedLocation('dnsOptions'),
+                  push: true,
+                ),
+                SettingsSection(
+                  title: t.pages.settings.inbound.title,
+                  icon: Icons.input_rounded,
+                  namedLocation: context.namedLocation('inboundOptions'),
+                  push: true,
+                ),
+                SettingsSection(
+                  title: t.pages.settings.tlsTricks.title,
+                  icon: Icons.content_cut_rounded,
+                  namedLocation: context.namedLocation('tlsTricks'),
+                  push: true,
+                ),
+                if (PlatformUtils.isIOS)
+                  Material(
+                    child: ListTile(
+                      title: Text(t.pages.settings.resetTunnel),
+                      leading: const Icon(Icons.autorenew_rounded),
+                      onTap: () async {
+                        await ref.read(resetTunnelNotifierProvider.notifier).run();
+                      },
+                    ),
+                  ),
+                SettingsSection(
                   title: t.pages.logs.title,
                   icon: Icons.description_rounded,
                   namedLocation: context.namedLocation('logs'),
