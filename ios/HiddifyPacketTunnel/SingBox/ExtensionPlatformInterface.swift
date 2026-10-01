@@ -213,11 +213,11 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         }
     }
 
-    public func usePlatformAutoDetectControl() -> Bool {
+    public func usePlatformAutoDetectInterfaceControl() -> Bool {
         false
     }
 
-    public func autoDetectControl(_: Int32) throws {}
+    public func autoDetectInterfaceControl(_: Int32) throws {}
 
     public func findConnectionOwner(_: Int32, sourceAddress _: String?, sourcePort _: Int32, destinationAddress _: String?, destinationPort _: Int32) throws -> LibboxConnectionOwner {
         throw NSError(domain: "ExtensionPlatformInterface", code: 0, userInfo: [NSLocalizedDescriptionKey: "Not implemented"])
@@ -291,7 +291,7 @@ public class ExtensionPlatformInterface: NSObject, LibboxPlatformInterfaceProtoc
         throw NSError(domain: "not implemented", code: 0)
     }
 
-    public func send(_: LibboxNotification?) throws {}
+    public func sendNotification(_: LibboxNotification?) throws {}
 
     class networkInterfaceArray: NSObject, LibboxNetworkInterfaceIteratorProtocol {
         private var iterator: IndexingIterator<[LibboxNetworkInterface]>
