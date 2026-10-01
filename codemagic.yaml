@@ -167,7 +167,7 @@ workflows:
       - name: Build for Simulator and launch with console capture
         script: |
           set -euo pipefail
-          flutter build ios --simulator --debug --no-codesign
+          flutter build ios --simulator --debug
 
           RUNTIME=$(xcrun simctl list runtimes | grep -i iOS | tail -1 | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.iOS[0-9A-Za-z-]+')
           DEVICETYPE=$(xcrun simctl list devicetypes | grep "iPhone 15 " | head -1 | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9-]+')
