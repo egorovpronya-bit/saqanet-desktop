@@ -209,19 +209,20 @@ class VPNManager: ObservableObject {
     }
     
     func disconnect() {
-        if manager.isOnDemandEnabled {
-            manager.isOnDemandEnabled = false
-            manager.onDemandRules = []
-            
-            manager.saveToPreferences { error in
-                if let error = error {
+        Task {
+            if manager.isOnDemandEnabled {
+                manager.isOnDemandEnabled = false
+                manager.onDemandRules = []
+
+                do {
+                    try await manager.saveToPreferences()
+                } catch {
                     print("save error:", error)
-                    return
                 }
             }
-        }
 
 //        guard state == .connected else { return }
-        manager.connection.stopVPNTunnel()
+            manager.connection.stopVPNTunnel()
+        }
     }
 }
