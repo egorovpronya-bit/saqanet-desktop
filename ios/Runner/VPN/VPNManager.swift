@@ -108,13 +108,9 @@ class VPNManager: ObservableObject {
         rule.probeURL = URL(string: "http://captive.apple.com")
         manager.onDemandRules = [rule]
         manager.isOnDemandEnabled = true
-        
-        do {
-            try await manager.saveToPreferences()
-            try await manager.loadFromPreferences()
-        } catch {
-            print(error.localizedDescription)
-        }
+
+        try await manager.saveToPreferences()
+        try await manager.loadFromPreferences()
     }
     
     @MainActor private func set(upload: Int64, download: Int64) {
@@ -141,7 +137,7 @@ class VPNManager: ObservableObject {
     func reset() {
         loaded = false
         if state != .disconnected && state != .invalid {
-            disconnect()
+            Task { [weak self] in await self?.disconnect() }
         }
         $state.filter { $0 == .disconnected || $0 == .invalid }.first().sink { [weak self] _ in
             Task { [weak self] () in
@@ -193,36 +189,37 @@ class VPNManager: ObservableObject {
         
         await set(upload: 0, download: 0)
 //        guard state == .disconnected else { return }
-        do {
-            try await loadVPNPreference()
-            try await enableVPNManager()
-            try manager.connection.startVPNTunnel(options: [
-                "Config": config as NSString,
-                "GrpcServiceModePort":NSNumber(value: grpcServiceModePort),
-                "DisableMemoryLimit": (disableMemoryLimit ? "YES" : "NO") as NSString,
-            ])
-            
-        } catch {
-            print(error.localizedDescription)
-        }
+        // was do/catch-and-print - startVPNTunnel() failures (e.g. a stale
+        // NETunnelProviderManager entry, NEVPNError) were invisible and the
+        // caller (MethodHandler "start") reported success regardless. Now
+        // rethrows so the Flutter side actually sees the failure.
+        try await loadVPNPreference()
+        try await enableVPNManager()
+        try manager.connection.startVPNTunnel(options: [
+            "Config": config as NSString,
+            "GrpcServiceModePort":NSNumber(value: grpcServiceModePort),
+            "DisableMemoryLimit": (disableMemoryLimit ? "YES" : "NO") as NSString,
+        ])
         connectTime = .now
     }
     
-    func disconnect() {
-        Task {
-            if manager.isOnDemandEnabled {
-                manager.isOnDemandEnabled = false
-                manager.onDemandRules = []
+    // was fire-and-forget (Task{}) - the native "stop" method channel handler
+    // returned immediately without this work even starting, so Dart's
+    // post-stop port poll could time out ("createService - null") before
+    // saveToPreferences/stopVPNTunnel ran at all. Now awaitable so callers
+    // only see it finish once it's actually done.
+    func disconnect() async {
+        if manager.isOnDemandEnabled {
+            manager.isOnDemandEnabled = false
+            manager.onDemandRules = []
 
-                do {
-                    try await manager.saveToPreferences()
-                } catch {
-                    print("save error:", error)
-                }
+            do {
+                try await manager.saveToPreferences()
+            } catch {
+                print("save error:", error)
             }
-
-//        guard state == .connected else { return }
-            manager.connection.stopVPNTunnel()
         }
+
+        manager.connection.stopVPNTunnel()
     }
 }
