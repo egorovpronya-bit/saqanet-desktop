@@ -191,7 +191,33 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
 
   @override
   Future<bool> stop() async {
+    _status.clean();
     await stopMethodChannel();
+
+    // iOS: NEVPNManager.stopVPNTunnel() is fire-and-forget on the OS side -
+    // awaiting the native "stop" handler above only confirms the stop was
+    // requested, not that the Network Extension actually tore down and
+    // released portBack. NEVPNStatus->disconnected (piped into _status via
+    // StatusEventHandler/service.status) is the authoritative signal for
+    // that and usually arrives in well under a second; wait on it first,
+    // then fall back to the old port-close poll if it doesn't show up.
+    if (Platform.isIOS) {
+      for (var i = 0; i < 10; i++) {
+        try {
+          switch (await _status.get(timeout: const Duration(seconds: 1))) {
+            case CoreStopped():
+              _isBgClientAvailable = false;
+              return true;
+            case CoreStarted():
+            case CoreStopping():
+            case CoreStarting():
+          }
+        } on TimeoutException {
+          // just retry
+        }
+      }
+    }
+
     // iOS now awaits saveToPreferences() (disabling on-demand) before
     // stopVPNTunnel() to prevent the system auto-reconnecting - that round
     // trip can exceed the default 2s budget, so give iOS more room.
