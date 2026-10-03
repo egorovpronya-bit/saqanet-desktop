@@ -211,6 +211,18 @@ class VPNManager: ObservableObject {
     // saveToPreferences/stopVPNTunnel ran at all. Now awaitable so callers
     // only see it finish once it's actually done.
     func disconnect() async {
+        // connect() always reloads self.manager via loadVPNPreference() first, but
+        // disconnect() didn't - on a cold start (e.g. the pre-connect safety-stop
+        // inside Dart's setupBackground, before any connect() has run this session)
+        // self.manager was still the generic NEVPNManager.shared() default, whose
+        // isOnDemandEnabled reads false regardless of what's actually saved in the
+        // NETunnelProviderManager profile. That skipped the disable branch below,
+        // left on-demand ("connect on any network") active on the real profile, and
+        // iOS would immediately re-arm the tunnel mid-stop - the exact race that
+        // produced "createService - null" and the Settings VPN toggle re-enabling
+        // itself. Load the real profile first so isOnDemandEnabled reflects reality.
+        try? await loadVPNPreference()
+
         if manager.isOnDemandEnabled {
             manager.isOnDemandEnabled = false
             manager.onDemandRules = []
