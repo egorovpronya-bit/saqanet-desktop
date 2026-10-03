@@ -192,7 +192,10 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
   @override
   Future<bool> stop() async {
     await stopMethodChannel();
-    if (!await waitUntilPort(portBack, false, null, maxTry: 10)) {
+    // iOS now awaits saveToPreferences() (disabling on-demand) before
+    // stopVPNTunnel() to prevent the system auto-reconnecting - that round
+    // trip can exceed the default 2s budget, so give iOS more room.
+    if (!await waitUntilPort(portBack, false, null, maxTry: Platform.isIOS ? 25 : 10)) {
       return false;
     }
 
