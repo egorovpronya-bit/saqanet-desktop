@@ -105,7 +105,9 @@ class VPNManager: ObservableObject {
         manager.isEnabled = true
         let rule = NEOnDemandRuleConnect()
         rule.interfaceTypeMatch = .any
-        rule.probeURL = URL(string: "http://captive.apple.com")
+        // No probeURL: iOS caches the captive-portal probe's response (301/200) until reboot,
+        // and once cached the rule stops matching so the OS never re-arms the tunnel. We always
+        // want to connect on any interface, so skip the probe entirely instead of racing its cache.
         manager.onDemandRules = [rule]
         manager.isOnDemandEnabled = true
 

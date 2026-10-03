@@ -25,6 +25,11 @@ public extension FilePath {
         .appendingPathComponent("Caches", isDirectory: true)
 
     static let workingDirectory = cacheDirectory.appendingPathComponent("Working", isDirectory: true)
+
+    // Persists the last config the app handed us via startVPNTunnel(options:), since iOS
+    // restarts the extension on sleep/network-change/on-demand WITHOUT passing options again -
+    // startTunnel/reloadService fall back to this file when options["Config"] is empty.
+    static let configFile = sharedDirectory.appendingPathComponent("last-tunnel-config.txt")
 }
 
 public extension URL {

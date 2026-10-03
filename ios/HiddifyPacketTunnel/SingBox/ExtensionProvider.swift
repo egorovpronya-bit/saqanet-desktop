@@ -13,6 +13,13 @@ open class ExtensionProvider: NEPacketTunnelProvider {
     private var platformInterface: ExtensionPlatformInterface!
     private var config: String!
 
+    // Saved so reloadService() can restart the core with the same params the
+    // OS-driven startTunnel() used, without the app having to pass options again.
+    private var lastSharedDir: String!
+    private var lastWorkDir: String!
+    private var lastCacheDir: String!
+    private var lastListen: String!
+
     override open func startTunnel(options: [String: NSObject]?) async throws {
         // Clear previous logs
         try? FileManager.default.removeItem(at: ExtensionProvider.errorFile)
@@ -22,16 +29,22 @@ open class ExtensionProvider: NEPacketTunnelProvider {
             writeMessage("(packet-tunnel) starting")
             
             // Extract options with better error handling
-            let disableMemoryLimit = false && (options?["DisableMemoryLimit"] as? NSString as? String ?? "NO") == "YES" 
+            let disableMemoryLimit = (options?["DisableMemoryLimit"] as? NSString as? String ?? "NO") == "YES"
             let grpcServiceModePort = (options?["GrpcServiceModePort"] as? NSNumber)?.intValue ?? 17079
-            
-            let config = options?["Config"] as? NSString as? String ?? ""
-            
-            // guard let config = SingBox.setupConfig(config: config2) else {
-            //             writeFatalError("(packet-tunnel) error: config is invalid")
-            //             return
-            // }
-//            self.config = config
+
+            var config = options?["Config"] as? NSString as? String ?? ""
+            if !config.isEmpty {
+                try? config.write(to: FilePath.configFile, atomically: true, encoding: .utf8)
+            } else {
+                // iOS restarted the extension itself (sleep, network change, on-demand) without
+                // the app re-passing options - options["Config"] is empty in that case. Fall back
+                // to the last config the app handed us, instead of starting with an empty config.
+                config = (try? String(contentsOf: FilePath.configFile, encoding: .utf8)) ?? ""
+                if !config.isEmpty {
+                    writeMessage("(packet-tunnel) options had no config, restored saved config from disk")
+                }
+            }
+            self.config = config
 
             do {
                 try FileManager.default.createDirectory(at: FilePath.workingDirectory, withIntermediateDirectories: true)
@@ -76,11 +89,16 @@ open class ExtensionProvider: NEPacketTunnelProvider {
             
             
             LibboxSetMemoryLimit(!disableMemoryLimit)
-            
+
+            lastSharedDir = sharedDir
+            lastWorkDir = workDir
+            lastCacheDir = cacheDir
+            lastListen = listen
+
             writeMessage("(packet-tunnel) setup completed successfully")
             try await startService1(config, sharedDir: sharedDir, workDir: workDir, cacheDir: cacheDir, listen: listen)
 
-            
+
         } catch {
             logger.error("Tunnel setup failed: \(error.localizedDescription)")
             writeFatalError("(packet-tunnel) setup failed: \(error.localizedDescription)")
@@ -187,19 +205,26 @@ open class ExtensionProvider: NEPacketTunnelProvider {
     func reloadService() async {
         logger.debug("Reloading service")
         writeMessage("(packet-tunnel) reloading service")
-//        reasserting = true
-//        defer { reasserting = false }
-//        
-//        stopService()
-//        do {
-//            guard let config = try? String(contentsOf: FilePath.configFile) else {
-//                writeFatalError("(packet-tunnel) error: cannot read config file")
-//                return
-//            }
-//            try await startService(config)
-//        } catch {
-//            writeFatalError("(packet-tunnel) error: reload service: \(error.localizedDescription)")
-//        }
+
+        guard let sharedDir = lastSharedDir, let workDir = lastWorkDir,
+              let cacheDir = lastCacheDir, let listen = lastListen else {
+            writeFatalError("(packet-tunnel) error: reload requested before first start, nothing to reload")
+            return
+        }
+        guard let config = try? String(contentsOf: FilePath.configFile, encoding: .utf8), !config.isEmpty else {
+            writeFatalError("(packet-tunnel) error: cannot read saved config file for reload")
+            return
+        }
+
+        reasserting = true
+        defer { reasserting = false }
+
+        stopService()
+        do {
+            try await startService1(config, sharedDir: sharedDir, workDir: workDir, cacheDir: cacheDir, listen: listen)
+        } catch {
+            writeFatalError("(packet-tunnel) error: reload service: \(error.localizedDescription)")
+        }
     }
     
     override open func handleAppMessage(_ messageData: Data) async -> Data? {
